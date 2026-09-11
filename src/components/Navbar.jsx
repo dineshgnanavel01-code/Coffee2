@@ -1,34 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-
-import {
-  Coffee,
-  Home,
-  Info,
-  Image as ImageIcon,
-  Mail,
-  ShoppingBag,
-  User,
-  Menu as MenuIcon,
-  X,
-  Plus,
-  Minus,
-  Trash2,
-  MapPin,
-  Phone,
-  CreditCard,
-  Banknote,
-  CheckCircle2,
-  Clock3,
-  PackageCheck,
-  Truck,
-  ChevronRight,
-  LogOut,
-  UserRound,
-  Heart,
-  Settings,
-} from "lucide-react";
-
+import {Coffee,Home,Info,Image as ImageIcon, Mail, ShoppingBag,User,Menu as MenuIcon,X,Plus,Minus, Trash2,MapPin,Phone,CreditCard,Banknote,CheckCircle2,Clock3,PackageCheck,Truck,ChevronRight,LogOut,UserRound,Heart,Settings,} from "lucide-react";
 import { useCart } from "../context/CartContext";
 
 const navItems = [
@@ -62,14 +34,11 @@ const navItems = [
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState("cart");
   const [orderId, setOrderId] = useState("");
-
   const [profileOpen, setProfileOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-
   const [customerName, setCustomerName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
@@ -85,11 +54,7 @@ function Navbar() {
     clearCart,
   } = useCart();
 
-  /* =========================================================
-     SCROLL DETECTION
-  ========================================================= */
-
-  useEffect(() => {
+    useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 40);
     };
@@ -105,11 +70,7 @@ function Navbar() {
     };
   }, []);
 
-  /* =========================================================
-     CLOSE MOBILE MENU WHEN SCREEN BECOMES DESKTOP
-  ========================================================= */
-
-  useEffect(() => {
+    useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
         setMenuOpen(false);
@@ -123,10 +84,7 @@ function Navbar() {
     };
   }, []);
 
-  /* =========================================================
-     BODY SCROLL LOCK
-  ========================================================= */
-
+  
   useEffect(() => {
     const shouldLock =
       menuOpen || cartOpen || profileOpen;
@@ -144,10 +102,6 @@ function Navbar() {
       document.documentElement.style.overflow = "";
     };
   }, [menuOpen, cartOpen, profileOpen]);
-
-  /* =========================================================
-     CART CALCULATIONS
-  ========================================================= */
 
   const subtotal = cartItems.reduce(
     (total, item) =>
@@ -170,10 +124,7 @@ function Navbar() {
   const formatPrice = (price) =>
     `₹${Number(price).toLocaleString("en-IN")}`;
 
-  /* =========================================================
-     MOBILE MENU
-  ========================================================= */
-
+  
   const closeMobileMenu = () => {
     setMenuOpen(false);
   };
@@ -182,10 +133,7 @@ function Navbar() {
     setMenuOpen((prev) => !prev);
   };
 
-  /* =========================================================
-     CART
-  ========================================================= */
-
+  
   const openCart = () => {
     setMenuOpen(false);
     setProfileOpen(false);
@@ -201,10 +149,6 @@ function Navbar() {
     }, 300);
   };
 
-  /* =========================================================
-     PROFILE
-  ========================================================= */
-
   const openProfile = () => {
     setMenuOpen(false);
     setCartOpen(false);
@@ -215,10 +159,7 @@ function Navbar() {
     setProfileOpen(false);
   };
 
-  /* =========================================================
-     CHECKOUT
-  ========================================================= */
-
+  
   const handleProceedToCheckout = () => {
     if (cartItems.length === 0) return;
 
@@ -253,11 +194,7 @@ function Navbar() {
     setCheckoutStep("tracking");
   };
 
-  /* =========================================================
-     LOGIN
-  ========================================================= */
-
-  const handleSignOut = () => {
+    const handleSignOut = () => {
     setIsLoggedIn(false);
     setProfileOpen(false);
   };
@@ -269,16 +206,9 @@ function Navbar() {
 
   return (
     <>
-      {/* =====================================================
-          FIXED NAVBAR
-      ====================================================== */}
-
+      
       <motion.header
-        /*
-          IMPORTANT:
-          initial={false} prevents the navbar from appearing
-          late/off-screen during the first mobile page load.
-        */
+       
         initial={false}
         animate={{ y: 0 }}
         transition={{
@@ -317,10 +247,7 @@ function Navbar() {
             xl:px-12
           "
         >
-          {/* =================================================
-              LOGO
-          ================================================== */}
-
+          
           <motion.a
             href="#home"
             onClick={closeMobileMenu}
@@ -418,10 +345,6 @@ function Navbar() {
             </div>
           </motion.a>
 
-          {/* =================================================
-              DESKTOP NAV
-          ================================================== */}
-
           <nav
             aria-label="Main navigation"
             className="
@@ -505,10 +428,7 @@ function Navbar() {
             })}
           </nav>
 
-          {/* =================================================
-              RIGHT ACTIONS
-          ================================================== */}
-
+        
           <div
             className="
               ml-auto
@@ -519,7 +439,7 @@ function Navbar() {
               sm:gap-2
             "
           >
-            {/* CART */}
+     
 
             <motion.button
               type="button"
@@ -599,8 +519,6 @@ function Navbar() {
               </AnimatePresence>
             </motion.button>
 
-            {/* PROFILE */}
-
             <motion.button
               type="button"
               onClick={openProfile}
@@ -630,7 +548,6 @@ function Navbar() {
               <User size={20} />
             </motion.button>
 
-            {/* MOBILE MENU */}
 
             <motion.button
               type="button"
@@ -707,14 +624,9 @@ function Navbar() {
         </div>
       </motion.header>
 
-      {/* =====================================================
-          MOBILE MENU
-      ====================================================== */}
-
-      <AnimatePresence>
+           <AnimatePresence>
         {menuOpen && (
           <>
-            {/* BACKDROP */}
 
             <motion.div
               initial={{ opacity: 0 }}
@@ -732,7 +644,6 @@ function Navbar() {
               aria-hidden="true"
             />
 
-            {/* DRAWER */}
 
             <motion.aside
               id="mobile-menu"
@@ -775,7 +686,6 @@ function Navbar() {
                 lg:hidden
               "
             >
-              {/* BRAND */}
 
               <div
                 className="
@@ -818,7 +728,6 @@ function Navbar() {
                 </div>
               </div>
 
-              {/* NAV LINKS */}
 
               <nav
                 aria-label="Mobile navigation"
@@ -893,7 +802,6 @@ function Navbar() {
                 )}
               </nav>
 
-              {/* PROFILE */}
 
               <motion.button
                 type="button"
@@ -933,7 +841,6 @@ function Navbar() {
                 />
               </motion.button>
 
-              {/* CART */}
 
               <motion.button
                 type="button"
@@ -991,10 +898,6 @@ function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* =====================================================
-          CART DRAWER
-      ====================================================== */}
-
       <AnimatePresence>
         {cartOpen && (
           <>
@@ -1036,7 +939,6 @@ function Navbar() {
                 shadow-[-20px_0_80px_rgba(0,0,0,0.3)]
               "
             >
-              {/* CART HEADER */}
 
               <div
                 className="
@@ -1107,9 +1009,6 @@ function Navbar() {
                 </motion.button>
               </div>
 
-              {/* =================================================
-                  CART
-              ================================================== */}
 
               {checkoutStep === "cart" && (
                 <div className="flex min-h-0 flex-1 flex-col">
@@ -1356,7 +1255,6 @@ function Navbar() {
                         </AnimatePresence>
                       </div>
 
-                      {/* TOTAL */}
 
                       <div
                         className="
@@ -1457,9 +1355,6 @@ function Navbar() {
                 </div>
               )}
 
-              {/* =================================================
-                  CHECKOUT
-              ================================================== */}
 
               {checkoutStep === "checkout" && (
                 <form
@@ -1645,7 +1540,6 @@ function Navbar() {
                       </div>
                     </div>
 
-                    {/* PAYMENT */}
 
                     <div>
                       <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[#a15f37]">
@@ -1713,7 +1607,6 @@ function Navbar() {
                       </div>
                     </div>
 
-                    {/* PAYABLE */}
 
                     <div className="rounded-3xl bg-[#2b1b14] p-5 text-white">
                       <div className="flex items-center justify-between gap-4">
@@ -1770,9 +1663,6 @@ function Navbar() {
                 </form>
               )}
 
-              {/* =================================================
-                  CONFIRMED
-              ================================================== */}
 
               {checkoutStep === "confirmed" && (
                 <div
@@ -1934,10 +1824,7 @@ function Navbar() {
                 </div>
               )}
 
-              {/* =================================================
-                  TRACKING
-              ================================================== */}
-
+          
               {checkoutStep === "tracking" && (
                 <div className="flex-1 overflow-y-auto p-4 sm:p-7">
                   <div className="rounded-3xl bg-[#2b1b14] p-5 text-white sm:p-6">
@@ -2097,10 +1984,6 @@ function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* =====================================================
-          PROFILE MODAL
-      ====================================================== */}
-
       <AnimatePresence>
         {profileOpen && (
           <>
@@ -2155,7 +2038,6 @@ function Navbar() {
                 sm:w-[calc(100%-32px)]
               "
             >
-              {/* PROFILE HEADER */}
 
               <div
                 className="
@@ -2249,7 +2131,6 @@ function Navbar() {
                 </div>
               </div>
 
-              {/* LOGGED IN */}
 
               {isLoggedIn ? (
                 <div className="p-4 sm:p-6">
