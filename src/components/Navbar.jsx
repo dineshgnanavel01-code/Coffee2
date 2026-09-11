@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -86,61 +85,94 @@ function Navbar() {
     clearCart,
   } = useCart();
 
+  /* =========================================================
+     SCROLL DETECTION
+  ========================================================= */
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 40);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
-useEffect(() => {
-  const shouldLockScroll = cartOpen || profileOpen || menuOpen;
+  /* =========================================================
+     BODY SCROLL LOCK
+  ========================================================= */
 
-  document.body.style.overflow = shouldLockScroll
-    ? "hidden"
-    : "";
+  useEffect(() => {
+    const shouldLockScroll =
+      cartOpen || profileOpen || menuOpen;
 
-  document.documentElement.style.overflow = shouldLockScroll
-    ? "hidden"
-    : "";
+    if (shouldLockScroll) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
 
-  return () => {
-    document.body.style.overflow = "";
-    document.documentElement.style.overflow = "";
-  };
-}, [cartOpen, profileOpen, menuOpen]);
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [cartOpen, profileOpen, menuOpen]);
+
+  /* =========================================================
+     CART CALCULATIONS
+  ========================================================= */
 
   const subtotal = cartItems.reduce(
-    (total, item) => total + Number(item.price) * item.quantity,
+    (total, item) =>
+      total + Number(item.price) * item.quantity,
     0
   );
 
   const tax = subtotal * 0.08;
 
   const deliveryFee =
-    subtotal === 0 ? 0 : subtotal >= 500 ? 0 : 40;
+    subtotal === 0
+      ? 0
+      : subtotal >= 500
+      ? 0
+      : 40;
 
-  const grandTotal = subtotal + tax + deliveryFee;
+  const grandTotal =
+    subtotal + tax + deliveryFee;
 
   const formatPrice = (price) =>
     `₹${Number(price).toLocaleString("en-IN")}`;
+
+  /* =========================================================
+     NAVIGATION
+  ========================================================= */
 
   const closeMobileMenu = () => {
     setMenuOpen(false);
   };
 
   const openCart = () => {
+    setMenuOpen(false);
     setCheckoutStep("cart");
     setCartOpen(true);
   };
 
+  /* =========================================================
+     CHECKOUT
+  ========================================================= */
+
   const handleProceedToCheckout = () => {
     if (cartItems.length === 0) return;
+
     setCheckoutStep("checkout");
   };
 
@@ -157,7 +189,10 @@ useEffect(() => {
     }
 
     const generatedId =
-      "DB-" + Math.floor(100000 + Math.random() * 900000);
+      "DB-" +
+      Math.floor(
+        100000 + Math.random() * 900000
+      );
 
     setOrderId(generatedId);
 
@@ -176,6 +211,10 @@ useEffect(() => {
       setCheckoutStep("cart");
     }, 300);
   };
+
+  /* =========================================================
+     PROFILE
+  ========================================================= */
 
   const handleSignOut = () => {
     setIsLoggedIn(false);
@@ -202,8 +241,7 @@ useEffect(() => {
         }}
         className={`
           fixed
-          left-0
-          right-0
+          inset-x-0
           top-0
           z-[100]
           w-full
@@ -212,10 +250,12 @@ useEffect(() => {
           ${
             scrolled
               ? "bg-[#2b1b14]/95 shadow-[0_15px_45px_rgba(0,0,0,0.25)] backdrop-blur-xl"
-              : "bg-[#2b1b14]/90 backdrop-blur-md"
+              : "bg-[#2b1b14]/95 backdrop-blur-md"
           }
         `}
       >
+        {/* NAV INNER */}
+
         <div
           className="
             mx-auto
@@ -225,9 +265,11 @@ useEffect(() => {
             max-w-[2050px]
             items-center
             justify-between
-            px-4
+            gap-2
+            px-3
             sm:px-6
             lg:px-10
+            xl:px-12
           "
         >
           {/* =================================================
@@ -237,7 +279,7 @@ useEffect(() => {
           <motion.a
             href="#home"
             onClick={closeMobileMenu}
-            whileHover={{ scale: 1.04 }}
+            whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.96 }}
             className="
               group
@@ -245,7 +287,7 @@ useEffect(() => {
               min-w-0
               shrink-0
               items-center
-              gap-2.5
+              gap-2
               sm:gap-3
             "
           >
@@ -262,8 +304,8 @@ useEffect(() => {
               className="
                 relative
                 flex
-                h-10
-                w-10
+                h-9
+                w-9
                 shrink-0
                 items-center
                 justify-center
@@ -275,7 +317,11 @@ useEffect(() => {
                 sm:w-11
               "
             >
-              <Coffee size={22} strokeWidth={2.5} />
+              <Coffee
+                size={20}
+                strokeWidth={2.5}
+                className="sm:h-[22px] sm:w-[22px]"
+              />
 
               <motion.span
                 animate={{
@@ -297,11 +343,31 @@ useEffect(() => {
             </motion.div>
 
             <div className="min-w-0">
-              <p className="truncate text-[15px] font-black tracking-tight text-white sm:text-lg">
+              <p
+                className="
+                  truncate
+                  text-[14px]
+                  font-black
+                  tracking-tight
+                  text-white
+                  sm:text-lg
+                "
+              >
                 Dina & Coffee
               </p>
 
-              <p className="text-[8px] font-semibold uppercase tracking-[0.16em] text-[#d9a878] sm:text-[10px] sm:tracking-[0.25em]">
+              <p
+                className="
+                  truncate
+                  text-[7px]
+                  font-semibold
+                  uppercase
+                  tracking-[0.12em]
+                  text-[#d9a878]
+                  sm:text-[10px]
+                  sm:tracking-[0.25em]
+                "
+              >
                 Brew • Relax • Enjoy
               </p>
             </div>
@@ -311,7 +377,14 @@ useEffect(() => {
               DESKTOP NAVIGATION
           ================================================== */}
 
-          <nav className="hidden items-center gap-1 lg:flex">
+          <nav
+            className="
+              hidden
+              items-center
+              gap-1
+              lg:flex
+            "
+          >
             {navItems.map((item) => {
               const Icon = item.icon;
 
@@ -323,7 +396,7 @@ useEffect(() => {
                   whileTap={{ scale: 0.96 }}
                   className="
                     group
-                    Sticky
+                    relative
                     flex
                     items-center
                     gap-2
@@ -341,7 +414,10 @@ useEffect(() => {
                 >
                   <motion.span
                     whileHover={{
-                      rotate: item.name === "Menu" ? -8 : 0,
+                      rotate:
+                        item.name === "Menu"
+                          ? -8
+                          : 0,
                       scale: 1.12,
                     }}
                     transition={{
@@ -351,10 +427,15 @@ useEffect(() => {
                     }}
                     className="text-[#d9a878]"
                   >
-                    <Icon size={16} strokeWidth={2.2} />
+                    <Icon
+                      size={16}
+                      strokeWidth={2.2}
+                    />
                   </motion.span>
 
                   <span>{item.name}</span>
+
+                  {/* UNDERLINE */}
 
                   <span
                     className="
@@ -380,7 +461,15 @@ useEffect(() => {
               RIGHT ACTIONS
           ================================================== */}
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div
+            className="
+              flex
+              shrink-0
+              items-center
+              gap-1.5
+              sm:gap-2
+            "
+          >
             {/* CART */}
 
             <motion.button
@@ -396,8 +485,9 @@ useEffect(() => {
               className="
                 relative
                 flex
-                h-10
-                w-10
+                h-9
+                w-9
+                shrink-0
                 items-center
                 justify-center
                 rounded-full
@@ -410,7 +500,10 @@ useEffect(() => {
               "
               aria-label="Open cart"
             >
-              <ShoppingBag size={19} />
+              <ShoppingBag
+                size={18}
+                className="sm:h-5 sm:w-5"
+              />
 
               <AnimatePresence>
                 {totalItems > 0 && (
@@ -457,7 +550,9 @@ useEffect(() => {
 
             <motion.button
               type="button"
-              onClick={() => setProfileOpen(true)}
+              onClick={() =>
+                setProfileOpen(true)
+              }
               whileHover={{
                 scale: 1.06,
                 y: -2,
@@ -469,6 +564,7 @@ useEffect(() => {
                 hidden
                 h-11
                 w-11
+                shrink-0
                 items-center
                 justify-center
                 rounded-full
@@ -487,20 +583,34 @@ useEffect(() => {
 
             <motion.button
               type="button"
-              onClick={() => setMenuOpen((prev) => !prev)}
+              onClick={() =>
+                setMenuOpen(
+                  (prev) => !prev
+                )
+              }
               whileTap={{ scale: 0.9 }}
               className="
                 flex
-                h-10
-                w-10
+                h-9
+                w-9
+                shrink-0
                 items-center
                 justify-center
                 rounded-full
                 bg-white/10
                 text-white
+                transition-colors
+                hover:bg-white/20
                 lg:hidden
+                sm:h-11
+                sm:w-11
               "
-              aria-label="Toggle menu"
+              aria-label={
+                menuOpen
+                  ? "Close menu"
+                  : "Open menu"
+              }
+              aria-expanded={menuOpen}
             >
               <AnimatePresence
                 mode="wait"
@@ -549,23 +659,31 @@ useEffect(() => {
         </div>
       </motion.header>
 
+      {/* =====================================================
+          MOBILE MENU
+      ====================================================== */}
+
       <AnimatePresence>
         {menuOpen && (
           <>
+            {/* BACKDROP */}
+
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={closeMobileMenu}
               className="
-                Sticky
+                fixed
                 inset-0
                 z-[90]
-                bg-black/50
+                bg-black/55
                 backdrop-blur-sm
                 lg:hidden
               "
             />
+
+            {/* DRAWER */}
 
             <motion.div
               initial={{
@@ -581,7 +699,7 @@ useEffect(() => {
                 x: "100%",
               }}
               transition={{
-                duration: 0.45,
+                duration: 0.4,
                 ease: [0.22, 1, 0.36, 1],
               }}
               className="
@@ -593,87 +711,135 @@ useEffect(() => {
                 w-[min(88vw,380px)]
                 overflow-y-auto
                 overscroll-contain
+                border-l
+                border-white/10
                 bg-[#2b1b14]
-                p-5
+                p-4
                 shadow-2xl
+                sm:p-5
                 lg:hidden
               "
             >
-              <div className="mb-6 rounded-3xl border border-white/10 bg-white/5 p-5">
+              {/* MOBILE BRAND CARD */}
+
+              <div
+                className="
+                  mb-5
+                  rounded-3xl
+                  border
+                  border-white/10
+                  bg-white/5
+                  p-4
+                  sm:mb-6
+                  sm:p-5
+                "
+              >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#c68b59] text-[#2b1b14]">
-                    <Coffee size={23} />
+                  <div
+                    className="
+                      flex
+                      h-11
+                      w-11
+                      shrink-0
+                      items-center
+                      justify-center
+                      rounded-2xl
+                      bg-[#c68b59]
+                      text-[#2b1b14]
+                    "
+                  >
+                    <Coffee size={22} />
                   </div>
 
-                  <div>
-                    <p className="font-black text-white">
+                  <div className="min-w-0">
+                    <p className="truncate font-black text-white">
                       Dina & Coffee
                     </p>
 
-                    <p className="text-xs text-[#d9a878]">
+                    <p className="truncate text-xs text-[#d9a878]">
                       Freshly brewed happiness
                     </p>
                   </div>
                 </div>
               </div>
 
+              {/* NAV LINKS */}
 
               <div className="space-y-2">
-                {navItems.map((item, index) => {
-                  const Icon = item.icon;
+                {navItems.map(
+                  (item, index) => {
+                    const Icon = item.icon;
 
-                  return (
-                    <motion.a
-                      key={item.name}
-                      href={item.href}
-                      onClick={closeMobileMenu}
-                      initial={{
-                        opacity: 0,
-                        x: 25,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        x: 0,
-                      }}
-                      transition={{
-                        delay: index * 0.07,
-                      }}
-                      whileHover={{
-                        x: 6,
-                      }}
-                      whileTap={{
-                        scale: 0.97,
-                      }}
-                      className="
-                        flex
-                        items-center
-                        gap-4
-                        rounded-2xl
-                        border
-                        border-white/5
-                        bg-white/5
-                        px-5
-                        py-4
-                        text-sm
-                        font-bold
-                        text-white/90
-                        transition-colors
-                        hover:bg-[#c68b59]
-                        hover:text-[#2b1b14]
-                      "
-                    >
-                      <Icon size={19} />
+                    return (
+                      <motion.a
+                        key={item.name}
+                        href={item.href}
+                        onClick={
+                          closeMobileMenu
+                        }
+                        initial={{
+                          opacity: 0,
+                          x: 25,
+                        }}
+                        animate={{
+                          opacity: 1,
+                          x: 0,
+                        }}
+                        transition={{
+                          delay:
+                            index * 0.06,
+                        }}
+                        whileHover={{
+                          x: 6,
+                        }}
+                        whileTap={{
+                          scale: 0.97,
+                        }}
+                        className="
+                          flex
+                          min-h-[54px]
+                          items-center
+                          gap-4
+                          rounded-2xl
+                          border
+                          border-white/5
+                          bg-white/5
+                          px-4
+                          py-3.5
+                          text-sm
+                          font-bold
+                          text-white/90
+                          transition-colors
+                          hover:bg-[#c68b59]
+                          hover:text-[#2b1b14]
+                          sm:px-5
+                          sm:py-4
+                        "
+                      >
+                        <Icon
+                          size={19}
+                          className="shrink-0"
+                        />
 
-                      <span>{item.name}</span>
+                        <span>
+                          {item.name}
+                        </span>
 
-                      <ChevronRight
-                        size={17}
-                        className="ml-auto opacity-50"
-                      />
-                    </motion.a>
-                  );
-                })}
+                        <ChevronRight
+                          size={17}
+                          className="
+                            ml-auto
+                            shrink-0
+                            opacity-50
+                          "
+                        />
+                      </motion.a>
+                    );
+                  }
+                )}
               </div>
+
+              {/* PROFILE */}
 
               <motion.button
                 type="button"
@@ -681,10 +847,13 @@ useEffect(() => {
                   closeMobileMenu();
                   setProfileOpen(true);
                 }}
-                whileTap={{ scale: 0.97 }}
+                whileTap={{
+                  scale: 0.97,
+                }}
                 className="
-                  mt-5
+                  mt-3
                   flex
+                  min-h-[54px]
                   w-full
                   items-center
                   gap-4
@@ -692,35 +861,46 @@ useEffect(() => {
                   border
                   border-white/5
                   bg-white/5
-                  px-5
-                  py-4
+                  px-4
+                  py-3.5
                   text-left
                   text-sm
                   font-bold
                   text-white/90
                   hover:bg-white/10
+                  sm:px-5
+                  sm:py-4
                 "
               >
-                <User size={19} />
+                <User
+                  size={19}
+                  className="shrink-0"
+                />
 
                 <span>My Profile</span>
 
                 <ChevronRight
                   size={17}
-                  className="ml-auto opacity-50"
+                  className="
+                    ml-auto
+                    shrink-0
+                    opacity-50
+                  "
                 />
               </motion.button>
 
+              {/* CART */}
+
               <motion.button
                 type="button"
-                onClick={() => {
-                  closeMobileMenu();
-                  openCart();
+                onClick={openCart}
+                whileTap={{
+                  scale: 0.97,
                 }}
-                whileTap={{ scale: 0.97 }}
                 className="
                   mt-2
                   flex
+                  min-h-[54px]
                   w-full
                   items-center
                   gap-4
@@ -728,21 +908,37 @@ useEffect(() => {
                   border
                   border-white/5
                   bg-white/5
-                  px-5
-                  py-4
+                  px-4
+                  py-3.5
                   text-left
                   text-sm
                   font-bold
                   text-white/90
                   hover:bg-white/10
+                  sm:px-5
+                  sm:py-4
                 "
               >
-                <ShoppingBag size={19} />
+                <ShoppingBag
+                  size={19}
+                  className="shrink-0"
+                />
 
                 <span>My Cart</span>
 
                 {totalItems > 0 && (
-                  <span className="ml-auto rounded-full bg-[#c68b59] px-2.5 py-1 text-xs font-black text-[#2b1b14]">
+                  <span
+                    className="
+                      ml-auto
+                      rounded-full
+                      bg-[#c68b59]
+                      px-2.5
+                      py-1
+                      text-xs
+                      font-black
+                      text-[#2b1b14]
+                    "
+                  >
                     {totalItems}
                   </span>
                 )}
@@ -759,11 +955,15 @@ useEffect(() => {
       <AnimatePresence>
         {cartOpen && (
           <>
+            {/* CART OVERLAY */}
+
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={handleCloseCartDrawer}
+              onClick={
+                handleCloseCartDrawer
+              }
               className="
                 fixed
                 inset-0
@@ -772,6 +972,8 @@ useEffect(() => {
                 backdrop-blur-sm
               "
             />
+
+            {/* CART PANEL */}
 
             <motion.aside
               initial={{ x: "100%" }}
@@ -798,25 +1000,57 @@ useEffect(() => {
             >
               {/* CART HEADER */}
 
-              <div className="flex items-center justify-between bg-[#2b1b14] px-5 py-5 text-white sm:px-7">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d9a878]">
+              <div
+                className="
+                  flex
+                  shrink-0
+                  items-center
+                  justify-between
+                  bg-[#2b1b14]
+                  px-4
+                  py-4
+                  text-white
+                  sm:px-7
+                  sm:py-5
+                "
+              >
+                <div className="min-w-0">
+                  <p
+                    className="
+                      text-[10px]
+                      font-bold
+                      uppercase
+                      tracking-[0.2em]
+                      text-[#d9a878]
+                    "
+                  >
                     Dina & Coffee
                   </p>
 
-                  <h2 className="mt-1 text-2xl font-black">
-                    {checkoutStep === "cart" && "Your Cart"}
-                    {checkoutStep === "checkout" && "Checkout"}
-                    {checkoutStep === "confirmed" &&
+                  <h2 className="mt-1 truncate text-xl font-black sm:text-2xl">
+                    {checkoutStep ===
+                      "cart" &&
+                      "Your Cart"}
+
+                    {checkoutStep ===
+                      "checkout" &&
+                      "Checkout"}
+
+                    {checkoutStep ===
+                      "confirmed" &&
                       "Order Confirmed"}
-                    {checkoutStep === "tracking" &&
+
+                    {checkoutStep ===
+                      "tracking" &&
                       "Track Order"}
                   </h2>
                 </div>
 
                 <motion.button
                   type="button"
-                  onClick={handleCloseCartDrawer}
+                  onClick={
+                    handleCloseCartDrawer
+                  }
                   whileHover={{
                     rotate: 90,
                     scale: 1.08,
@@ -825,28 +1059,50 @@ useEffect(() => {
                     scale: 0.9,
                   }}
                   className="
+                    ml-3
                     flex
                     h-10
                     w-10
+                    shrink-0
                     items-center
                     justify-center
                     rounded-full
                     bg-white/10
                     hover:bg-white/20
                   "
+                  aria-label="Close cart"
                 >
                   <X size={20} />
                 </motion.button>
               </div>
 
+              {/* =================================================
+                  CART
+              ================================================== */}
+
               {checkoutStep === "cart" && (
                 <div className="flex min-h-0 flex-1 flex-col">
                   {cartItems.length === 0 ? (
-                    <div className="flex flex-1 flex-col items-center justify-center px-8 text-center">
+                    <div
+                      className="
+                        flex
+                        flex-1
+                        flex-col
+                        items-center
+                        justify-center
+                        px-6
+                        text-center
+                      "
+                    >
                       <motion.div
                         animate={{
                           y: [0, -8, 0],
-                          rotate: [0, -2, 2, 0],
+                          rotate: [
+                            0,
+                            -2,
+                            2,
+                            0,
+                          ],
                         }}
                         transition={{
                           duration: 4,
@@ -872,14 +1128,17 @@ useEffect(() => {
                       </h3>
 
                       <p className="mt-2 max-w-sm text-sm leading-6 text-[#806b5f]">
-                        Looks like you haven't added your favorite
-                        coffee yet. Explore our menu and find
-                        something delicious.
+                        Looks like you haven't
+                        added your favorite coffee
+                        yet. Explore our menu and
+                        find something delicious.
                       </p>
 
                       <motion.a
                         href="#menu"
-                        onClick={handleCloseCartDrawer}
+                        onClick={
+                          handleCloseCartDrawer
+                        }
                         whileHover={{
                           scale: 1.04,
                           y: -2,
@@ -908,152 +1167,224 @@ useEffect(() => {
                     </div>
                   ) : (
                     <>
+                      {/* ITEMS */}
 
-                      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5 sm:p-7">
-                        <AnimatePresence initial={false}>
-                          {cartItems.map((item) => (
-                            <motion.div
-                              key={item.id}
-                              layout
-                              initial={{
-                                opacity: 0,
-                                x: 30,
-                              }}
-                              animate={{
-                                opacity: 1,
-                                x: 0,
-                              }}
-                              exit={{
-                                opacity: 0,
-                                x: -30,
-                                height: 0,
-                                marginBottom: 0,
-                              }}
-                              className="
-                                overflow-hidden
-                                rounded-3xl
-                                border
-                                border-[#dfd1c7]
-                                bg-white
-                                p-3
-                                shadow-sm
-                              "
-                            >
-                              <div className="flex gap-3">
-                                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl bg-[#eee4da]">
-                                  <img
-                                    src={item.image}
-                                    alt={item.name}
-                                    className="h-full w-full object-cover"
-                                  />
-                                </div>
-
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex items-start justify-between gap-2">
-                                    <div>
-                                      <h3 className="truncate text-sm font-black text-[#2b1b14]">
-                                        {item.name}
-                                      </h3>
-
-                                      <p className="mt-1 text-xs text-[#9a8a80]">
-                                        {item.category}
-                                      </p>
-                                    </div>
-
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        removeFromCart(item.id)
+                      <div
+                        className="
+                          min-h-0
+                          flex-1
+                          space-y-4
+                          overflow-y-auto
+                          p-4
+                          sm:p-7
+                        "
+                      >
+                        <AnimatePresence
+                          initial={false}
+                        >
+                          {cartItems.map(
+                            (item) => (
+                              <motion.div
+                                key={item.id}
+                                layout
+                                initial={{
+                                  opacity: 0,
+                                  x: 30,
+                                }}
+                                animate={{
+                                  opacity: 1,
+                                  x: 0,
+                                }}
+                                exit={{
+                                  opacity: 0,
+                                  x: -30,
+                                  height: 0,
+                                  marginBottom: 0,
+                                }}
+                                className="
+                                  overflow-hidden
+                                  rounded-3xl
+                                  border
+                                  border-[#dfd1c7]
+                                  bg-white
+                                  p-3
+                                  shadow-sm
+                                "
+                              >
+                                <div className="flex gap-3">
+                                  <div
+                                    className="
+                                      h-20
+                                      w-20
+                                      shrink-0
+                                      overflow-hidden
+                                      rounded-2xl
+                                      bg-[#eee4da]
+                                      sm:h-24
+                                      sm:w-24
+                                    "
+                                  >
+                                    <img
+                                      src={
+                                        item.image
+                                      }
+                                      alt={
+                                        item.name
                                       }
                                       className="
-                                        flex
-                                        h-8
-                                        w-8
-                                        shrink-0
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        text-[#a98e80]
-                                        transition-colors
-                                        hover:bg-red-50
-                                        hover:text-red-500
+                                        h-full
+                                        w-full
+                                        object-cover
                                       "
-                                      aria-label={`Remove ${item.name}`}
-                                    >
-                                      <Trash2 size={15} />
-                                    </button>
+                                    />
                                   </div>
 
-                                  <div className="mt-4 flex items-center justify-between gap-3">
-                                    <div className="flex items-center rounded-full border border-[#dfd1c7] bg-[#f8f3ed]">
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-start justify-between gap-2">
+                                      <div className="min-w-0">
+                                        <h3 className="truncate text-sm font-black text-[#2b1b14]">
+                                          {
+                                            item.name
+                                          }
+                                        </h3>
+
+                                        <p className="mt-1 truncate text-xs text-[#9a8a80]">
+                                          {
+                                            item.category
+                                          }
+                                        </p>
+                                      </div>
+
                                       <button
                                         type="button"
                                         onClick={() =>
-                                          decreaseQuantity(item.id)
+                                          removeFromCart(
+                                            item.id
+                                          )
                                         }
                                         className="
                                           flex
                                           h-8
                                           w-8
+                                          shrink-0
                                           items-center
                                           justify-center
                                           rounded-full
-                                          text-[#2b1b14]
-                                          hover:bg-[#eee4da]
+                                          text-[#a98e80]
+                                          hover:bg-red-50
+                                          hover:text-red-500
                                         "
+                                        aria-label={`Remove ${item.name}`}
                                       >
-                                        <Minus size={13} />
-                                      </button>
-
-                                      <span className="w-8 text-center text-xs font-black text-[#2b1b14]">
-                                        {item.quantity}
-                                      </span>
-
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          increaseQuantity(item.id)
-                                        }
-                                        className="
-                                          flex
-                                          h-8
-                                          w-8
-                                          items-center
-                                          justify-center
-                                          rounded-full
-                                          text-[#2b1b14]
-                                          hover:bg-[#eee4da]
-                                        "
-                                      >
-                                        <Plus size={13} />
+                                        <Trash2
+                                          size={15}
+                                        />
                                       </button>
                                     </div>
 
-                                    <p className="text-sm font-black text-[#a15f37]">
-                                      {formatPrice(
-                                        Number(item.price) *
-                                          item.quantity
-                                      )}
-                                    </p>
+                                    <div className="mt-3 flex items-center justify-between gap-2 sm:mt-4">
+                                      <div className="flex items-center rounded-full border border-[#dfd1c7] bg-[#f8f3ed]">
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            decreaseQuantity(
+                                              item.id
+                                            )
+                                          }
+                                          className="
+                                            flex
+                                            h-8
+                                            w-8
+                                            items-center
+                                            justify-center
+                                            rounded-full
+                                            hover:bg-[#eee4da]
+                                          "
+                                        >
+                                          <Minus
+                                            size={
+                                              13
+                                            }
+                                          />
+                                        </button>
+
+                                        <span className="w-7 text-center text-xs font-black">
+                                          {
+                                            item.quantity
+                                          }
+                                        </span>
+
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            increaseQuantity(
+                                              item.id
+                                            )
+                                          }
+                                          className="
+                                            flex
+                                            h-8
+                                            w-8
+                                            items-center
+                                            justify-center
+                                            rounded-full
+                                            hover:bg-[#eee4da]
+                                          "
+                                        >
+                                          <Plus
+                                            size={
+                                              13
+                                            }
+                                          />
+                                        </button>
+                                      </div>
+
+                                      <p className="text-sm font-black text-[#a15f37]">
+                                        {formatPrice(
+                                          Number(
+                                            item.price
+                                          ) *
+                                            item.quantity
+                                        )}
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </motion.div>
-                          ))}
+                              </motion.div>
+                            )
+                          )}
                         </AnimatePresence>
                       </div>
-                      <div className="border-t border-[#dfd1c7] bg-white p-5 sm:p-7">
+
+                      {/* TOTAL */}
+
+                      <div
+                        className="
+                          shrink-0
+                          border-t
+                          border-[#dfd1c7]
+                          bg-white
+                          p-4
+                          sm:p-7
+                        "
+                      >
                         <div className="space-y-3 text-sm">
                           <div className="flex justify-between text-[#806b5f]">
-                            <span>Subtotal</span>
+                            <span>
+                              Subtotal
+                            </span>
 
                             <span className="font-semibold text-[#2b1b14]">
-                              {formatPrice(subtotal)}
+                              {formatPrice(
+                                subtotal
+                              )}
                             </span>
                           </div>
 
                           <div className="flex justify-between text-[#806b5f]">
-                            <span>Tax (8%)</span>
+                            <span>
+                              Tax (8%)
+                            </span>
 
                             <span className="font-semibold text-[#2b1b14]">
                               {formatPrice(tax)}
@@ -1061,38 +1392,53 @@ useEffect(() => {
                           </div>
 
                           <div className="flex justify-between text-[#806b5f]">
-                            <span>Delivery</span>
+                            <span>
+                              Delivery
+                            </span>
 
                             <span className="font-semibold text-[#2b1b14]">
-                              {deliveryFee === 0
+                              {deliveryFee ===
+                              0
                                 ? "FREE"
-                                : formatPrice(deliveryFee)}
+                                : formatPrice(
+                                    deliveryFee
+                                  )}
                             </span>
                           </div>
 
-                          {subtotal > 0 && subtotal < 500 && (
-                            <p className="rounded-xl bg-[#f8f3ed] px-3 py-2 text-xs text-[#9a693f]">
-                              Add {formatPrice(500 - subtotal)} more
-                              for free delivery.
-                            </p>
-                          )}
+                          {subtotal > 0 &&
+                            subtotal < 500 && (
+                              <p className="rounded-xl bg-[#f8f3ed] px-3 py-2 text-xs text-[#9a693f]">
+                                Add{" "}
+                                {formatPrice(
+                                  500 -
+                                    subtotal
+                                )}{" "}
+                                more for free
+                                delivery.
+                              </p>
+                            )}
 
                           <div className="my-3 h-px bg-[#eee4da]" />
 
                           <div className="flex items-center justify-between">
-                            <span className="text-base font-black text-[#2b1b14]">
+                            <span className="text-base font-black">
                               Total
                             </span>
 
-                            <span className="text-2xl font-black text-[#a15f37]">
-                              {formatPrice(grandTotal)}
+                            <span className="text-xl font-black text-[#a15f37] sm:text-2xl">
+                              {formatPrice(
+                                grandTotal
+                              )}
                             </span>
                           </div>
                         </div>
 
                         <motion.button
                           type="button"
-                          onClick={handleProceedToCheckout}
+                          onClick={
+                            handleProceedToCheckout
+                          }
                           whileHover={{
                             scale: 1.02,
                             y: -2,
@@ -1109,18 +1455,19 @@ useEffect(() => {
                             gap-2
                             rounded-full
                             bg-[#2b1b14]
-                            px-6
+                            px-5
                             py-4
                             text-sm
                             font-black
                             text-white
                             shadow-lg
-                            transition-colors
                             hover:bg-[#a15f37]
                           "
                         >
                           Proceed to Checkout
-                          <ChevronRight size={17} />
+                          <ChevronRight
+                            size={17}
+                          />
                         </motion.button>
                       </div>
                     </>
@@ -1128,18 +1475,28 @@ useEffect(() => {
                 </div>
               )}
 
+              {/* =================================================
+                  CHECKOUT
+              ================================================== */}
+
               {checkoutStep === "checkout" && (
                 <form
                   onSubmit={handleConfirmOrder}
-                  className="min-h-0 flex-1 overflow-y-auto"
+                  className="
+                    min-h-0
+                    flex-1
+                    overflow-y-auto
+                  "
                 >
-                  <div className="space-y-5 p-5 sm:p-7">
+                  <div className="space-y-5 p-4 sm:p-7">
                     <div>
                       <p className="mb-2 text-xs font-bold uppercase tracking-wider text-[#a15f37]">
                         Delivery Details
                       </p>
 
                       <div className="space-y-3">
+                        {/* NAME */}
+
                         <div className="relative">
                           <UserRound
                             size={17}
@@ -1154,9 +1511,13 @@ useEffect(() => {
 
                           <input
                             type="text"
-                            value={customerName}
+                            value={
+                              customerName
+                            }
                             onChange={(e) =>
-                              setCustomerName(e.target.value)
+                              setCustomerName(
+                                e.target.value
+                              )
                             }
                             placeholder="Full Name"
                             required
@@ -1169,16 +1530,19 @@ useEffect(() => {
                               py-3.5
                               pl-11
                               pr-4
-                              text-sm
+                              text-base
                               outline-none
                               transition-all
                               placeholder:text-[#b3a299]
                               focus:border-[#c68b59]
                               focus:ring-4
                               focus:ring-[#c68b59]/10
+                              sm:text-sm
                             "
                           />
                         </div>
+
+                        {/* ADDRESS */}
 
                         <div className="relative">
                           <MapPin
@@ -1189,7 +1553,9 @@ useEffect(() => {
                           <textarea
                             value={address}
                             onChange={(e) =>
-                              setAddress(e.target.value)
+                              setAddress(
+                                e.target.value
+                              )
                             }
                             placeholder="Delivery Address"
                             required
@@ -1204,16 +1570,19 @@ useEffect(() => {
                               py-3.5
                               pl-11
                               pr-4
-                              text-sm
+                              text-base
                               outline-none
                               transition-all
                               placeholder:text-[#b3a299]
                               focus:border-[#c68b59]
                               focus:ring-4
                               focus:ring-[#c68b59]/10
+                              sm:text-sm
                             "
                           />
                         </div>
+
+                        {/* CITY + PHONE */}
 
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div className="relative">
@@ -1232,7 +1601,9 @@ useEffect(() => {
                               type="text"
                               value={city}
                               onChange={(e) =>
-                                setCity(e.target.value)
+                                setCity(
+                                  e.target.value
+                                )
                               }
                               placeholder="City"
                               required
@@ -1245,13 +1616,12 @@ useEffect(() => {
                                 py-3.5
                                 pl-11
                                 pr-4
-                                text-sm
+                                text-base
                                 outline-none
-                                transition-all
-                                placeholder:text-[#b3a299]
                                 focus:border-[#c68b59]
                                 focus:ring-4
                                 focus:ring-[#c68b59]/10
+                                sm:text-sm
                               "
                             />
                           </div>
@@ -1272,7 +1642,9 @@ useEffect(() => {
                               type="tel"
                               value={phone}
                               onChange={(e) =>
-                                setPhone(e.target.value)
+                                setPhone(
+                                  e.target.value
+                                )
                               }
                               placeholder="Phone Number"
                               required
@@ -1285,19 +1657,20 @@ useEffect(() => {
                                 py-3.5
                                 pl-11
                                 pr-4
-                                text-sm
+                                text-base
                                 outline-none
-                                transition-all
-                                placeholder:text-[#b3a299]
                                 focus:border-[#c68b59]
                                 focus:ring-4
                                 focus:ring-[#c68b59]/10
+                                sm:text-sm
                               "
                             />
                           </div>
                         </div>
                       </div>
                     </div>
+
+                    {/* PAYMENT */}
 
                     <div>
                       <p className="mb-3 text-xs font-bold uppercase tracking-wider text-[#a15f37]">
@@ -1319,27 +1692,34 @@ useEffect(() => {
                             icon: Banknote,
                           },
                         ].map((method) => {
-                          const Icon = method.icon;
+                          const Icon =
+                            method.icon;
 
                           const selected =
-                            paymentMethod === method.name;
+                            paymentMethod ===
+                            method.name;
 
                           return (
                             <button
-                              key={method.name}
+                              key={
+                                method.name
+                              }
                               type="button"
                               onClick={() =>
-                                setPaymentMethod(method.name)
+                                setPaymentMethod(
+                                  method.name
+                                )
                               }
                               className={`
                                 flex
+                                min-h-[90px]
                                 flex-col
                                 items-center
                                 justify-center
                                 gap-2
                                 rounded-2xl
                                 border
-                                p-4
+                                p-3
                                 text-xs
                                 font-bold
                                 transition-all
@@ -1351,26 +1731,45 @@ useEffect(() => {
                               `}
                             >
                               <Icon size={20} />
-                              {method.name}
+                              <span className="text-center">
+                                {method.name}
+                              </span>
                             </button>
                           );
                         })}
                       </div>
                     </div>
+
+                    {/* PAYABLE */}
+
                     <div className="rounded-3xl bg-[#2b1b14] p-5 text-white">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-4">
                         <span className="text-sm text-white/60">
                           Payable Amount
                         </span>
 
-                        <span className="text-2xl font-black text-[#d9a878]">
-                          {formatPrice(grandTotal)}
+                        <span className="text-xl font-black text-[#d9a878] sm:text-2xl">
+                          {formatPrice(
+                            grandTotal
+                          )}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="sticky bottom-0 border-t border-[#dfd1c7] bg-white p-5 sm:p-7">
+                  {/* CHECKOUT BUTTON */}
+
+                  <div
+                    className="
+                      sticky
+                      bottom-0
+                      border-t
+                      border-[#dfd1c7]
+                      bg-white
+                      p-4
+                      sm:p-7
+                    "
+                  >
                     <motion.button
                       type="submit"
                       whileHover={{
@@ -1397,15 +1796,33 @@ useEffect(() => {
                         hover:bg-[#a15f37]
                       "
                     >
-                      <CheckCircle2 size={18} />
+                      <CheckCircle2
+                        size={18}
+                      />
                       Confirm Order
                     </motion.button>
                   </div>
                 </form>
               )}
 
+              {/* =================================================
+                  CONFIRMED
+              ================================================== */}
+
               {checkoutStep === "confirmed" && (
-                <div className="flex flex-1 flex-col items-center justify-center overflow-y-auto px-6 py-10 text-center">
+                <div
+                  className="
+                    flex
+                    flex-1
+                    flex-col
+                    items-center
+                    justify-center
+                    overflow-y-auto
+                    px-5
+                    py-10
+                    text-center
+                  "
+                >
                   <motion.div
                     initial={{
                       scale: 0,
@@ -1446,19 +1863,39 @@ useEffect(() => {
                     transition={{
                       delay: 0.2,
                     }}
-                    className="mt-7 text-3xl font-black text-[#2b1b14]"
+                    className="
+                      mt-7
+                      text-2xl
+                      font-black
+                      text-[#2b1b14]
+                      sm:text-3xl
+                    "
                   >
                     Order Confirmed!
                   </motion.h3>
 
                   <p className="mt-3 max-w-sm text-sm leading-6 text-[#806b5f]">
-                    Thank you for ordering from Dina & Coffee.
-                    Your freshly brewed favorites are being
-                    prepared.
+                    Thank you for ordering
+                    from Dina & Coffee. Your
+                    freshly brewed favorites are
+                    being prepared.
                   </p>
 
-                  <div className="mt-7 w-full max-w-sm rounded-3xl border border-[#dfd1c7] bg-white p-5 text-left shadow-sm">
-                    <div className="flex items-center justify-between">
+                  <div
+                    className="
+                      mt-7
+                      w-full
+                      max-w-sm
+                      rounded-3xl
+                      border
+                      border-[#dfd1c7]
+                      bg-white
+                      p-5
+                      text-left
+                      shadow-sm
+                    "
+                  >
+                    <div className="flex items-center justify-between gap-3">
                       <span className="text-xs font-bold uppercase tracking-wider text-[#9a8a80]">
                         Order ID
                       </span>
@@ -1471,12 +1908,12 @@ useEffect(() => {
                     <div className="my-4 h-px bg-[#eee4da]" />
 
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#f8f3ed] text-[#a15f37]">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f8f3ed] text-[#a15f37]">
                         <Clock3 size={18} />
                       </div>
 
                       <div>
-                        <p className="text-sm font-bold text-[#2b1b14]">
+                        <p className="text-sm font-bold">
                           Estimated delivery
                         </p>
 
@@ -1487,12 +1924,28 @@ useEffect(() => {
                     </div>
                   </div>
 
-                  <div className="mt-6 flex w-full max-w-sm flex-col gap-3 sm:flex-row">
+                  <div
+                    className="
+                      mt-6
+                      flex
+                      w-full
+                      max-w-sm
+                      flex-col
+                      gap-3
+                      sm:flex-row
+                    "
+                  >
                     <motion.button
                       type="button"
-                      onClick={handleTrackOrder}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
+                      onClick={
+                        handleTrackOrder
+                      }
+                      whileHover={{
+                        scale: 1.03,
+                      }}
+                      whileTap={{
+                        scale: 0.97,
+                      }}
                       className="
                         flex
                         flex-1
@@ -1514,9 +1967,15 @@ useEffect(() => {
 
                     <motion.button
                       type="button"
-                      onClick={handleCloseCartDrawer}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
+                      onClick={
+                        handleCloseCartDrawer
+                      }
+                      whileHover={{
+                        scale: 1.03,
+                      }}
+                      whileTap={{
+                        scale: 0.97,
+                      }}
                       className="
                         flex
                         flex-1
@@ -1540,40 +1999,48 @@ useEffect(() => {
                 </div>
               )}
 
+              {/* =================================================
+                  TRACKING
+              ================================================== */}
+
               {checkoutStep === "tracking" && (
-                <div className="flex-1 overflow-y-auto p-5 sm:p-7">
-                  <div className="rounded-3xl bg-[#2b1b14] p-6 text-white">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-7">
+                  <div className="rounded-3xl bg-[#2b1b14] p-5 text-white sm:p-6">
                     <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d9a878]">
                       Order ID
                     </p>
 
-                    <h3 className="mt-2 text-2xl font-black">
+                    <h3 className="mt-2 text-xl font-black sm:text-2xl">
                       {orderId}
                     </h3>
 
                     <p className="mt-2 text-sm text-white/60">
-                      Estimated delivery: 25–40 minutes
+                      Estimated delivery:
+                      25–40 minutes
                     </p>
                   </div>
 
-                  <div className="mt-7 space-y-0">
+                  <div className="mt-7">
                     {[
                       {
-                        title: "Order Confirmed",
+                        title:
+                          "Order Confirmed",
                         description:
                           "Your order has been successfully received.",
                         icon: CheckCircle2,
                         active: true,
                       },
                       {
-                        title: "Preparing Your Coffee",
+                        title:
+                          "Preparing Your Coffee",
                         description:
                           "Our baristas are preparing your order.",
                         icon: Coffee,
                         active: true,
                       },
                       {
-                        title: "Out for Delivery",
+                        title:
+                          "Out for Delivery",
                         description:
                           "Your order will soon be on its way.",
                         icon: Truck,
@@ -1581,89 +2048,100 @@ useEffect(() => {
                       },
                       {
                         title: "Delivered",
-                        description: "Enjoy your coffee!",
+                        description:
+                          "Enjoy your coffee!",
                         icon: PackageCheck,
                         active: false,
                       },
-                    ].map((step, index) => {
-                      const Icon = step.icon;
+                    ].map(
+                      (step, index) => {
+                        const Icon =
+                          step.icon;
 
-                      return (
-                        <div
-                          key={step.title}
-                          className="relative flex gap-4"
-                        >
-                          {index !== 3 && (
-                            <div
-                              className={`
-                                absolute
-                                left-5
-                                top-10
-                                h-14
-                                w-px
-                                ${
-                                  step.active
-                                    ? "bg-[#c68b59]"
-                                    : "bg-[#dfd1c7]"
-                                }
-                              `}
-                            />
-                          )}
-
-                          <motion.div
-                            animate={
-                              step.active
-                                ? {
-                                    scale: [1, 1.08, 1],
-                                  }
-                                : {}
-                            }
-                            transition={{
-                              duration: 2,
-                              repeat: Infinity,
-                            }}
-                            className={`
-                              relative
-                              z-10
-                              flex
-                              h-10
-                              w-10
-                              shrink-0
-                              items-center
-                              justify-center
-                              rounded-full
-                              ${
-                                step.active
-                                  ? "bg-[#c68b59] text-[#2b1b14]"
-                                  : "bg-[#eee4da] text-[#9a8a80]"
-                              }
-                            `}
+                        return (
+                          <div
+                            key={step.title}
+                            className="relative flex gap-4"
                           >
-                            <Icon size={18} />
-                          </motion.div>
+                            {index !== 3 && (
+                              <div
+                                className={`
+                                  absolute
+                                  left-5
+                                  top-10
+                                  h-14
+                                  w-px
+                                  ${
+                                    step.active
+                                      ? "bg-[#c68b59]"
+                                      : "bg-[#dfd1c7]"
+                                  }
+                                `}
+                              />
+                            )}
 
-                          <div className="pb-8">
-                            <h4
+                            <motion.div
+                              animate={
+                                step.active
+                                  ? {
+                                      scale: [
+                                        1,
+                                        1.08,
+                                        1,
+                                      ],
+                                    }
+                                  : {}
+                              }
+                              transition={{
+                                duration: 2,
+                                repeat:
+                                  Infinity,
+                              }}
                               className={`
-                                text-sm
-                                font-black
+                                relative
+                                z-10
+                                flex
+                                h-10
+                                w-10
+                                shrink-0
+                                items-center
+                                justify-center
+                                rounded-full
                                 ${
                                   step.active
-                                    ? "text-[#2b1b14]"
-                                    : "text-[#9a8a80]"
+                                    ? "bg-[#c68b59] text-[#2b1b14]"
+                                    : "bg-[#eee4da] text-[#9a8a80]"
                                 }
                               `}
                             >
-                              {step.title}
-                            </h4>
+                              <Icon size={18} />
+                            </motion.div>
 
-                            <p className="mt-1 text-xs leading-5 text-[#806b5f]">
-                              {step.description}
-                            </p>
+                            <div className="pb-8">
+                              <h4
+                                className={`
+                                  text-sm
+                                  font-black
+                                  ${
+                                    step.active
+                                      ? "text-[#2b1b14]"
+                                      : "text-[#9a8a80]"
+                                  }
+                                `}
+                              >
+                                {step.title}
+                              </h4>
+
+                              <p className="mt-1 text-xs leading-5 text-[#806b5f]">
+                                {
+                                  step.description
+                                }
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      }
+                    )}
                   </div>
 
                   <div className="mt-3 rounded-3xl border border-[#dfd1c7] bg-white p-5">
@@ -1678,8 +2156,11 @@ useEffect(() => {
                         </p>
 
                         <p className="mt-1 text-sm leading-5 text-[#806b5f]">
-                          {address || "Your delivery address"}
-                          {city ? `, ${city}` : ""}
+                          {address ||
+                            "Your delivery address"}
+                          {city
+                            ? `, ${city}`
+                            : ""}
                         </p>
                       </div>
                     </div>
@@ -1691,6 +2172,10 @@ useEffect(() => {
         )}
       </AnimatePresence>
 
+      {/* =====================================================
+          PROFILE MODAL
+      ====================================================== */}
+
       <AnimatePresence>
         {profileOpen && (
           <>
@@ -1698,7 +2183,9 @@ useEffect(() => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setProfileOpen(false)}
+              onClick={() =>
+                setProfileOpen(false)
+              }
               className="
                 fixed
                 inset-0
@@ -1734,7 +2221,7 @@ useEffect(() => {
                 left-1/2
                 top-1/2
                 z-[310]
-                w-[calc(100%-32px)]
+                w-[calc(100%-24px)]
                 max-w-md
                 -translate-x-1/2
                 -translate-y-1/2
@@ -1742,9 +2229,24 @@ useEffect(() => {
                 rounded-[2rem]
                 bg-[#f8f3ed]
                 shadow-[0_35px_100px_rgba(0,0,0,0.35)]
+                sm:w-[calc(100%-32px)]
               "
             >
-              <div className="relative overflow-hidden bg-[#2b1b14] px-6 pb-8 pt-7 text-white">
+              {/* PROFILE HEADER */}
+
+              <div
+                className="
+                  relative
+                  overflow-hidden
+                  bg-[#2b1b14]
+                  px-5
+                  pb-7
+                  pt-6
+                  text-white
+                  sm:px-6
+                  sm:pt-7
+                "
+              >
                 <motion.div
                   animate={{
                     rotate: 360,
@@ -1768,11 +2270,13 @@ useEffect(() => {
 
                 <button
                   type="button"
-                  onClick={() => setProfileOpen(false)}
+                  onClick={() =>
+                    setProfileOpen(false)
+                  }
                   className="
                     absolute
-                    right-5
-                    top-5
+                    right-4
+                    top-4
                     flex
                     h-9
                     w-9
@@ -1782,23 +2286,27 @@ useEffect(() => {
                     bg-white/10
                     hover:bg-white/20
                   "
+                  aria-label="Close profile"
                 >
                   <X size={17} />
                 </button>
 
                 <div className="flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#c68b59] text-[#2b1b14] shadow-xl">
-                    <User size={28} />
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#c68b59] text-[#2b1b14] shadow-xl sm:h-16 sm:w-16">
+                    <User
+                      size={25}
+                      className="sm:h-7 sm:w-7"
+                    />
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     {isLoggedIn ? (
                       <>
-                        <p className="text-xl font-black">
+                        <p className="text-lg font-black sm:text-xl">
                           Dinesh
                         </p>
 
-                        <p className="text-sm text-white/60">
+                        <p className="truncate text-xs text-white/60 sm:text-sm">
                           dinesh@example.com
                         </p>
 
@@ -1808,11 +2316,11 @@ useEffect(() => {
                       </>
                     ) : (
                       <>
-                        <p className="text-xl font-black">
+                        <p className="text-lg font-black sm:text-xl">
                           Welcome
                         </p>
 
-                        <p className="text-sm text-white/60">
+                        <p className="text-xs text-white/60 sm:text-sm">
                           Sign in to your account
                         </p>
                       </>
@@ -1821,41 +2329,43 @@ useEffect(() => {
                 </div>
               </div>
 
-              {isLoggedIn ? (
-                <div className="p-5 sm:p-6">
+              {/* LOGGED IN */}
 
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="rounded-2xl bg-white p-4 text-center">
-                      <p className="text-xl font-black text-[#2b1b14]">
+              {isLoggedIn ? (
+                <div className="p-4 sm:p-6">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                    <div className="rounded-2xl bg-white p-3 text-center sm:p-4">
+                      <p className="text-lg font-black text-[#2b1b14] sm:text-xl">
                         12
                       </p>
 
-                      <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[#9a8a80]">
+                      <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider text-[#9a8a80] sm:text-[10px]">
                         Orders
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-white p-4 text-center">
-                      <p className="text-xl font-black text-[#2b1b14]">
+                    <div className="rounded-2xl bg-white p-3 text-center sm:p-4">
+                      <p className="text-lg font-black text-[#2b1b14] sm:text-xl">
                         8
                       </p>
 
-                      <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[#9a8a80]">
+                      <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider text-[#9a8a80] sm:text-[10px]">
                         Favorites
                       </p>
                     </div>
 
-                    <div className="rounded-2xl bg-white p-4 text-center">
-                      <p className="text-xl font-black text-[#2b1b14]">
+                    <div className="rounded-2xl bg-white p-3 text-center sm:p-4">
+                      <p className="text-lg font-black text-[#2b1b14] sm:text-xl">
                         250
                       </p>
 
-                      <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-[#9a8a80]">
+                      <p className="mt-1 text-[9px] font-semibold uppercase tracking-wider text-[#9a8a80] sm:text-[10px]">
                         Points
                       </p>
                     </div>
                   </div>
-                  <div className="mt-5 space-y-2">
+
+                  <div className="mt-4 space-y-2 sm:mt-5">
                     <button
                       type="button"
                       className="
@@ -1871,7 +2381,6 @@ useEffect(() => {
                         text-sm
                         font-bold
                         text-[#2b1b14]
-                        transition
                         hover:bg-[#eee4da]
                       "
                     >
@@ -1903,7 +2412,6 @@ useEffect(() => {
                         text-sm
                         font-bold
                         text-[#2b1b14]
-                        transition
                         hover:bg-[#eee4da]
                       "
                     >
@@ -1922,7 +2430,9 @@ useEffect(() => {
 
                     <button
                       type="button"
-                      onClick={handleSignOut}
+                      onClick={
+                        handleSignOut
+                      }
                       className="
                         flex
                         w-full
@@ -1936,25 +2446,28 @@ useEffect(() => {
                         text-sm
                         font-bold
                         text-red-600
-                        transition
                         hover:bg-red-100
                       "
                     >
                       <LogOut size={18} />
+
                       Sign Out
                     </button>
                   </div>
                 </div>
               ) : (
-                <div className="p-6">
+                <div className="p-5 sm:p-6">
                   <p className="text-center text-sm leading-6 text-[#806b5f]">
-                    Sign in to view your orders, favorites and
+                    Sign in to view your
+                    orders, favorites and
                     rewards.
                   </p>
 
                   <motion.button
                     type="button"
-                    onClick={handleSignIn}
+                    onClick={
+                      handleSignIn
+                    }
                     whileHover={{
                       scale: 1.02,
                       y: -2,
