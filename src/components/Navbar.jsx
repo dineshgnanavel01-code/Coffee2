@@ -110,22 +110,19 @@ function Navbar() {
   ========================================================= */
 
   useEffect(() => {
-    const shouldLockScroll =
-      cartOpen || profileOpen || menuOpen;
+    const shouldLock =
+      menuOpen || cartOpen || profileOpen;
 
-    if (shouldLockScroll) {
+    if (shouldLock) {
       document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
     }
 
     return () => {
       document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
     };
-  }, [cartOpen, profileOpen, menuOpen]);
+  }, [menuOpen, cartOpen, profileOpen]);
 
   /* =========================================================
      CART CALCULATIONS
@@ -153,17 +150,33 @@ function Navbar() {
     `₹${Number(price).toLocaleString("en-IN")}`;
 
   /* =========================================================
-     NAVIGATION
+     MOBILE MENU
   ========================================================= */
 
   const closeMobileMenu = () => {
     setMenuOpen(false);
   };
 
+  const toggleMobileMenu = () => {
+    setMenuOpen((prev) => !prev);
+  };
+
+  /* =========================================================
+     CART
+  ========================================================= */
+
   const openCart = () => {
     setMenuOpen(false);
     setCheckoutStep("cart");
     setCartOpen(true);
+  };
+
+  const handleCloseCartDrawer = () => {
+    setCartOpen(false);
+
+    setTimeout(() => {
+      setCheckoutStep("cart");
+    }, 300);
   };
 
   /* =========================================================
@@ -204,14 +217,6 @@ function Navbar() {
     setCheckoutStep("tracking");
   };
 
-  const handleCloseCartDrawer = () => {
-    setCartOpen(false);
-
-    setTimeout(() => {
-      setCheckoutStep("cart");
-    }, 300);
-  };
-
   /* =========================================================
      PROFILE
   ========================================================= */
@@ -229,14 +234,14 @@ function Navbar() {
   return (
     <>
       {/* =====================================================
-          NAVBAR
+          FIXED NAVBAR
       ====================================================== */}
 
       <motion.header
-        initial={{ y: -100 }}
+        initial={{ y: -80 }}
         animate={{ y: 0 }}
         transition={{
-          duration: 0.7,
+          duration: 0.55,
           ease: [0.22, 1, 0.36, 1],
         }}
         className={`
@@ -244,18 +249,18 @@ function Navbar() {
           inset-x-0
           top-0
           z-[100]
+          h-[76px]
           w-full
+          overflow-visible
           transition-all
-          duration-500
+          duration-300
           ${
             scrolled
-              ? "bg-[#2b1b14]/95 shadow-[0_15px_45px_rgba(0,0,0,0.25)] backdrop-blur-xl"
+              ? "bg-[#2b1b14]/95 shadow-[0_12px_40px_rgba(0,0,0,0.25)] backdrop-blur-xl"
               : "bg-[#2b1b14]/95 backdrop-blur-md"
           }
         `}
       >
-        {/* NAV INNER */}
-
         <div
           className="
             mx-auto
@@ -266,6 +271,7 @@ function Navbar() {
             items-center
             justify-between
             gap-2
+            overflow-hidden
             px-3
             sm:px-6
             lg:px-10
@@ -279,10 +285,9 @@ function Navbar() {
           <motion.a
             href="#home"
             onClick={closeMobileMenu}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.96 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
             className="
-              group
               flex
               min-w-0
               shrink-0
@@ -294,7 +299,7 @@ function Navbar() {
             <motion.div
               whileHover={{
                 rotate: -8,
-                scale: 1.08,
+                scale: 1.06,
               }}
               transition={{
                 type: "spring",
@@ -326,13 +331,14 @@ function Navbar() {
               <motion.span
                 animate={{
                   opacity: [0.25, 0.6, 0.25],
-                  scale: [1, 1.15, 1],
+                  scale: [1, 1.12, 1],
                 }}
                 transition={{
                   duration: 2.5,
                   repeat: Infinity,
                 }}
                 className="
+                  pointer-events-none
                   absolute
                   -inset-1
                   rounded-2xl
@@ -374,13 +380,16 @@ function Navbar() {
           </motion.a>
 
           {/* =================================================
-              DESKTOP NAVIGATION
+              DESKTOP NAV
           ================================================== */}
 
           <nav
+            aria-label="Main navigation"
             className="
               hidden
+              min-w-0
               items-center
+              justify-center
               gap-1
               lg:flex
             "
@@ -398,6 +407,7 @@ function Navbar() {
                     group
                     relative
                     flex
+                    shrink-0
                     items-center
                     gap-2
                     rounded-full
@@ -406,7 +416,7 @@ function Navbar() {
                     text-sm
                     font-semibold
                     text-white/80
-                    transition-colors
+                    transition-all
                     duration-300
                     hover:bg-white/10
                     hover:text-white
@@ -434,8 +444,6 @@ function Navbar() {
                   </motion.span>
 
                   <span>{item.name}</span>
-
-                  {/* UNDERLINE */}
 
                   <span
                     className="
@@ -476,8 +484,8 @@ function Navbar() {
               type="button"
               onClick={openCart}
               whileHover={{
-                scale: 1.06,
-                y: -2,
+                scale: 1.05,
+                y: -1,
               }}
               whileTap={{
                 scale: 0.93,
@@ -498,7 +506,11 @@ function Navbar() {
                 sm:h-11
                 sm:w-11
               "
-              aria-label="Open cart"
+              aria-label={`Open cart${
+                totalItems > 0
+                  ? `, ${totalItems} items`
+                  : ""
+              }`}
             >
               <ShoppingBag
                 size={18}
@@ -550,12 +562,13 @@ function Navbar() {
 
             <motion.button
               type="button"
-              onClick={() =>
-                setProfileOpen(true)
-              }
+              onClick={() => {
+                setMenuOpen(false);
+                setProfileOpen(true);
+              }}
               whileHover={{
-                scale: 1.06,
-                y: -2,
+                scale: 1.05,
+                y: -1,
               }}
               whileTap={{
                 scale: 0.93,
@@ -579,15 +592,11 @@ function Navbar() {
               <User size={20} />
             </motion.button>
 
-            {/* MOBILE MENU */}
+            {/* MOBILE MENU BUTTON */}
 
             <motion.button
               type="button"
-              onClick={() =>
-                setMenuOpen(
-                  (prev) => !prev
-                )
-              }
+              onClick={toggleMobileMenu}
               whileTap={{ scale: 0.9 }}
               className="
                 flex
@@ -611,6 +620,7 @@ function Navbar() {
                   : "Open menu"
               }
               aria-expanded={menuOpen}
+              aria-controls="mobile-menu"
             >
               <AnimatePresence
                 mode="wait"
@@ -681,11 +691,13 @@ function Navbar() {
                 backdrop-blur-sm
                 lg:hidden
               "
+              aria-hidden="true"
             />
 
             {/* DRAWER */}
 
-            <motion.div
+            <motion.aside
+              id="mobile-menu"
               initial={{
                 opacity: 0,
                 x: "100%",
@@ -699,7 +711,7 @@ function Navbar() {
                 x: "100%",
               }}
               transition={{
-                duration: 0.4,
+                duration: 0.35,
                 ease: [0.22, 1, 0.36, 1],
               }}
               className="
@@ -707,8 +719,12 @@ function Navbar() {
                 right-0
                 top-[76px]
                 z-[95]
+                flex
                 h-[calc(100dvh-76px)]
                 w-[min(88vw,380px)]
+                max-w-full
+                flex-col
+                overflow-x-hidden
                 overflow-y-auto
                 overscroll-contain
                 border-l
@@ -720,18 +736,17 @@ function Navbar() {
                 lg:hidden
               "
             >
-              {/* MOBILE BRAND CARD */}
+              {/* BRAND */}
 
               <div
                 className="
                   mb-5
+                  shrink-0
                   rounded-3xl
                   border
                   border-white/10
                   bg-white/5
                   p-4
-                  sm:mb-6
-                  sm:p-5
                 "
               >
                 <div className="flex items-center gap-3">
@@ -765,7 +780,10 @@ function Navbar() {
 
               {/* NAV LINKS */}
 
-              <div className="space-y-2">
+              <nav
+                aria-label="Mobile navigation"
+                className="shrink-0 space-y-2"
+              >
                 {navItems.map(
                   (item, index) => {
                     const Icon = item.icon;
@@ -774,12 +792,10 @@ function Navbar() {
                       <motion.a
                         key={item.name}
                         href={item.href}
-                        onClick={
-                          closeMobileMenu
-                        }
+                        onClick={closeMobileMenu}
                         initial={{
                           opacity: 0,
-                          x: 25,
+                          x: 20,
                         }}
                         animate={{
                           opacity: 1,
@@ -787,10 +803,10 @@ function Navbar() {
                         }}
                         transition={{
                           delay:
-                            index * 0.06,
+                            index * 0.05,
                         }}
                         whileHover={{
-                          x: 6,
+                          x: 5,
                         }}
                         whileTap={{
                           scale: 0.97,
@@ -798,6 +814,7 @@ function Navbar() {
                         className="
                           flex
                           min-h-[54px]
+                          w-full
                           items-center
                           gap-4
                           rounded-2xl
@@ -812,8 +829,6 @@ function Navbar() {
                           transition-colors
                           hover:bg-[#c68b59]
                           hover:text-[#2b1b14]
-                          sm:px-5
-                          sm:py-4
                         "
                       >
                         <Icon
@@ -821,7 +836,7 @@ function Navbar() {
                           className="shrink-0"
                         />
 
-                        <span>
+                        <span className="min-w-0 truncate">
                           {item.name}
                         </span>
 
@@ -837,7 +852,7 @@ function Navbar() {
                     );
                   }
                 )}
-              </div>
+              </nav>
 
               {/* PROFILE */}
 
@@ -847,14 +862,13 @@ function Navbar() {
                   closeMobileMenu();
                   setProfileOpen(true);
                 }}
-                whileTap={{
-                  scale: 0.97,
-                }}
+                whileTap={{ scale: 0.97 }}
                 className="
                   mt-3
                   flex
                   min-h-[54px]
                   w-full
+                  shrink-0
                   items-center
                   gap-4
                   rounded-2xl
@@ -868,8 +882,6 @@ function Navbar() {
                   font-bold
                   text-white/90
                   hover:bg-white/10
-                  sm:px-5
-                  sm:py-4
                 "
               >
                 <User
@@ -881,11 +893,7 @@ function Navbar() {
 
                 <ChevronRight
                   size={17}
-                  className="
-                    ml-auto
-                    shrink-0
-                    opacity-50
-                  "
+                  className="ml-auto shrink-0 opacity-50"
                 />
               </motion.button>
 
@@ -894,14 +902,13 @@ function Navbar() {
               <motion.button
                 type="button"
                 onClick={openCart}
-                whileTap={{
-                  scale: 0.97,
-                }}
+                whileTap={{ scale: 0.97 }}
                 className="
                   mt-2
                   flex
                   min-h-[54px]
                   w-full
+                  shrink-0
                   items-center
                   gap-4
                   rounded-2xl
@@ -915,8 +922,6 @@ function Navbar() {
                   font-bold
                   text-white/90
                   hover:bg-white/10
-                  sm:px-5
-                  sm:py-4
                 "
               >
                 <ShoppingBag
@@ -943,27 +948,25 @@ function Navbar() {
                   </span>
                 )}
               </motion.button>
-            </motion.div>
+
+              <div className="h-6 shrink-0" />
+            </motion.aside>
           </>
         )}
       </AnimatePresence>
 
       {/* =====================================================
-          CART DRAWER
+          CART
       ====================================================== */}
 
       <AnimatePresence>
         {cartOpen && (
           <>
-            {/* CART OVERLAY */}
-
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={
-                handleCloseCartDrawer
-              }
+              onClick={handleCloseCartDrawer}
               className="
                 fixed
                 inset-0
@@ -972,8 +975,6 @@ function Navbar() {
                 backdrop-blur-sm
               "
             />
-
-            {/* CART PANEL */}
 
             <motion.aside
               initial={{ x: "100%" }}
@@ -994,6 +995,7 @@ function Navbar() {
                 w-full
                 max-w-[520px]
                 flex-col
+                overflow-hidden
                 bg-[#f8f3ed]
                 shadow-[-20px_0_80px_rgba(0,0,0,0.3)]
               "
@@ -1003,6 +1005,7 @@ function Navbar() {
               <div
                 className="
                   flex
+                  h-[76px]
                   shrink-0
                   items-center
                   justify-between
@@ -1011,7 +1014,6 @@ function Navbar() {
                   py-4
                   text-white
                   sm:px-7
-                  sm:py-5
                 "
               >
                 <div className="min-w-0">
@@ -1028,36 +1030,29 @@ function Navbar() {
                   </p>
 
                   <h2 className="mt-1 truncate text-xl font-black sm:text-2xl">
-                    {checkoutStep ===
-                      "cart" &&
+                    {checkoutStep === "cart" &&
                       "Your Cart"}
 
-                    {checkoutStep ===
-                      "checkout" &&
+                    {checkoutStep === "checkout" &&
                       "Checkout"}
 
                     {checkoutStep ===
                       "confirmed" &&
                       "Order Confirmed"}
 
-                    {checkoutStep ===
-                      "tracking" &&
+                    {checkoutStep === "tracking" &&
                       "Track Order"}
                   </h2>
                 </div>
 
                 <motion.button
                   type="button"
-                  onClick={
-                    handleCloseCartDrawer
-                  }
+                  onClick={handleCloseCartDrawer}
                   whileHover={{
                     rotate: 90,
                     scale: 1.08,
                   }}
-                  whileTap={{
-                    scale: 0.9,
-                  }}
+                  whileTap={{ scale: 0.9 }}
                   className="
                     ml-3
                     flex
@@ -1077,7 +1072,7 @@ function Navbar() {
               </div>
 
               {/* =================================================
-                  CART
+                  CART CONTENT
               ================================================== */}
 
               {checkoutStep === "cart" && (
@@ -1090,6 +1085,7 @@ function Navbar() {
                         flex-col
                         items-center
                         justify-center
+                        overflow-y-auto
                         px-6
                         text-center
                       "
@@ -1113,6 +1109,7 @@ function Navbar() {
                           flex
                           h-24
                           w-24
+                          shrink-0
                           items-center
                           justify-center
                           rounded-full
@@ -1136,16 +1133,12 @@ function Navbar() {
 
                       <motion.a
                         href="#menu"
-                        onClick={
-                          handleCloseCartDrawer
-                        }
+                        onClick={handleCloseCartDrawer}
                         whileHover={{
                           scale: 1.04,
                           y: -2,
                         }}
-                        whileTap={{
-                          scale: 0.96,
-                        }}
+                        whileTap={{ scale: 0.96 }}
                         className="
                           mt-7
                           inline-flex
@@ -1167,8 +1160,6 @@ function Navbar() {
                     </div>
                   ) : (
                     <>
-                      {/* ITEMS */}
-
                       <div
                         className="
                           min-h-0
@@ -1179,86 +1170,101 @@ function Navbar() {
                           sm:p-7
                         "
                       >
-                        <AnimatePresence
-                          initial={false}
-                        >
-                          {cartItems.map(
-                            (item) => (
-                              <motion.div
-                                key={item.id}
-                                layout
-                                initial={{
-                                  opacity: 0,
-                                  x: 30,
-                                }}
-                                animate={{
-                                  opacity: 1,
-                                  x: 0,
-                                }}
-                                exit={{
-                                  opacity: 0,
-                                  x: -30,
-                                  height: 0,
-                                  marginBottom: 0,
-                                }}
-                                className="
-                                  overflow-hidden
-                                  rounded-3xl
-                                  border
-                                  border-[#dfd1c7]
-                                  bg-white
-                                  p-3
-                                  shadow-sm
-                                "
-                              >
-                                <div className="flex gap-3">
-                                  <div
+                        <AnimatePresence initial={false}>
+                          {cartItems.map((item) => (
+                            <motion.div
+                              key={item.id}
+                              layout
+                              initial={{
+                                opacity: 0,
+                                x: 30,
+                              }}
+                              animate={{
+                                opacity: 1,
+                                x: 0,
+                              }}
+                              exit={{
+                                opacity: 0,
+                                x: -30,
+                                height: 0,
+                              }}
+                              className="
+                                overflow-hidden
+                                rounded-3xl
+                                border
+                                border-[#dfd1c7]
+                                bg-white
+                                p-3
+                                shadow-sm
+                              "
+                            >
+                              <div className="flex gap-3">
+                                <div
+                                  className="
+                                    h-20
+                                    w-20
+                                    shrink-0
+                                    overflow-hidden
+                                    rounded-2xl
+                                    bg-[#eee4da]
+                                    sm:h-24
+                                    sm:w-24
+                                  "
+                                >
+                                  <img
+                                    src={item.image}
+                                    alt={item.name}
                                     className="
-                                      h-20
-                                      w-20
-                                      shrink-0
-                                      overflow-hidden
-                                      rounded-2xl
-                                      bg-[#eee4da]
-                                      sm:h-24
-                                      sm:w-24
+                                      h-full
+                                      w-full
+                                      object-cover
                                     "
-                                  >
-                                    <img
-                                      src={
-                                        item.image
-                                      }
-                                      alt={
-                                        item.name
+                                  />
+                                </div>
+
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
+                                      <h3 className="truncate text-sm font-black text-[#2b1b14]">
+                                        {item.name}
+                                      </h3>
+
+                                      <p className="mt-1 truncate text-xs text-[#9a8a80]">
+                                        {item.category}
+                                      </p>
+                                    </div>
+
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        removeFromCart(
+                                          item.id
+                                        )
                                       }
                                       className="
-                                        h-full
-                                        w-full
-                                        object-cover
+                                        flex
+                                        h-8
+                                        w-8
+                                        shrink-0
+                                        items-center
+                                        justify-center
+                                        rounded-full
+                                        text-[#a98e80]
+                                        hover:bg-red-50
+                                        hover:text-red-500
                                       "
-                                    />
+                                      aria-label={`Remove ${item.name}`}
+                                    >
+                                      <Trash2 size={15} />
+                                    </button>
                                   </div>
 
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-start justify-between gap-2">
-                                      <div className="min-w-0">
-                                        <h3 className="truncate text-sm font-black text-[#2b1b14]">
-                                          {
-                                            item.name
-                                          }
-                                        </h3>
-
-                                        <p className="mt-1 truncate text-xs text-[#9a8a80]">
-                                          {
-                                            item.category
-                                          }
-                                        </p>
-                                      </div>
-
+                                  <div className="mt-3 flex items-center justify-between gap-2">
+                                    <div className="flex items-center rounded-full border border-[#dfd1c7] bg-[#f8f3ed]">
                                       <button
                                         type="button"
                                         onClick={() =>
-                                          removeFromCart(
+                                          decreaseQuantity(
                                             item.id
                                           )
                                         }
@@ -1266,93 +1272,51 @@ function Navbar() {
                                           flex
                                           h-8
                                           w-8
-                                          shrink-0
                                           items-center
                                           justify-center
                                           rounded-full
-                                          text-[#a98e80]
-                                          hover:bg-red-50
-                                          hover:text-red-500
+                                          hover:bg-[#eee4da]
                                         "
-                                        aria-label={`Remove ${item.name}`}
                                       >
-                                        <Trash2
-                                          size={15}
-                                        />
+                                        <Minus size={13} />
+                                      </button>
+
+                                      <span className="w-7 text-center text-xs font-black">
+                                        {item.quantity}
+                                      </span>
+
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          increaseQuantity(
+                                            item.id
+                                          )
+                                        }
+                                        className="
+                                          flex
+                                          h-8
+                                          w-8
+                                          items-center
+                                          justify-center
+                                          rounded-full
+                                          hover:bg-[#eee4da]
+                                        "
+                                      >
+                                        <Plus size={13} />
                                       </button>
                                     </div>
 
-                                    <div className="mt-3 flex items-center justify-between gap-2 sm:mt-4">
-                                      <div className="flex items-center rounded-full border border-[#dfd1c7] bg-[#f8f3ed]">
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            decreaseQuantity(
-                                              item.id
-                                            )
-                                          }
-                                          className="
-                                            flex
-                                            h-8
-                                            w-8
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            hover:bg-[#eee4da]
-                                          "
-                                        >
-                                          <Minus
-                                            size={
-                                              13
-                                            }
-                                          />
-                                        </button>
-
-                                        <span className="w-7 text-center text-xs font-black">
-                                          {
-                                            item.quantity
-                                          }
-                                        </span>
-
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            increaseQuantity(
-                                              item.id
-                                            )
-                                          }
-                                          className="
-                                            flex
-                                            h-8
-                                            w-8
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            hover:bg-[#eee4da]
-                                          "
-                                        >
-                                          <Plus
-                                            size={
-                                              13
-                                            }
-                                          />
-                                        </button>
-                                      </div>
-
-                                      <p className="text-sm font-black text-[#a15f37]">
-                                        {formatPrice(
-                                          Number(
-                                            item.price
-                                          ) *
-                                            item.quantity
-                                        )}
-                                      </p>
-                                    </div>
+                                    <p className="text-sm font-black text-[#a15f37]">
+                                      {formatPrice(
+                                        Number(item.price) *
+                                          item.quantity
+                                      )}
+                                    </p>
                                   </div>
                                 </div>
-                              </motion.div>
-                            )
-                          )}
+                              </div>
+                            </motion.div>
+                          ))}
                         </AnimatePresence>
                       </div>
 
@@ -1370,21 +1334,15 @@ function Navbar() {
                       >
                         <div className="space-y-3 text-sm">
                           <div className="flex justify-between text-[#806b5f]">
-                            <span>
-                              Subtotal
-                            </span>
+                            <span>Subtotal</span>
 
                             <span className="font-semibold text-[#2b1b14]">
-                              {formatPrice(
-                                subtotal
-                              )}
+                              {formatPrice(subtotal)}
                             </span>
                           </div>
 
                           <div className="flex justify-between text-[#806b5f]">
-                            <span>
-                              Tax (8%)
-                            </span>
+                            <span>Tax (8%)</span>
 
                             <span className="font-semibold text-[#2b1b14]">
                               {formatPrice(tax)}
@@ -1392,13 +1350,10 @@ function Navbar() {
                           </div>
 
                           <div className="flex justify-between text-[#806b5f]">
-                            <span>
-                              Delivery
-                            </span>
+                            <span>Delivery</span>
 
                             <span className="font-semibold text-[#2b1b14]">
-                              {deliveryFee ===
-                              0
+                              {deliveryFee === 0
                                 ? "FREE"
                                 : formatPrice(
                                     deliveryFee
@@ -1411,8 +1366,7 @@ function Navbar() {
                               <p className="rounded-xl bg-[#f8f3ed] px-3 py-2 text-xs text-[#9a693f]">
                                 Add{" "}
                                 {formatPrice(
-                                  500 -
-                                    subtotal
+                                  500 - subtotal
                                 )}{" "}
                                 more for free
                                 delivery.
@@ -1427,25 +1381,19 @@ function Navbar() {
                             </span>
 
                             <span className="text-xl font-black text-[#a15f37] sm:text-2xl">
-                              {formatPrice(
-                                grandTotal
-                              )}
+                              {formatPrice(grandTotal)}
                             </span>
                           </div>
                         </div>
 
                         <motion.button
                           type="button"
-                          onClick={
-                            handleProceedToCheckout
-                          }
+                          onClick={handleProceedToCheckout}
                           whileHover={{
                             scale: 1.02,
                             y: -2,
                           }}
-                          whileTap={{
-                            scale: 0.97,
-                          }}
+                          whileTap={{ scale: 0.97 }}
                           className="
                             mt-5
                             flex
@@ -1465,9 +1413,7 @@ function Navbar() {
                           "
                         >
                           Proceed to Checkout
-                          <ChevronRight
-                            size={17}
-                          />
+                          <ChevronRight size={17} />
                         </motion.button>
                       </div>
                     </>
@@ -1495,8 +1441,6 @@ function Navbar() {
                       </p>
 
                       <div className="space-y-3">
-                        {/* NAME */}
-
                         <div className="relative">
                           <UserRound
                             size={17}
@@ -1511,9 +1455,7 @@ function Navbar() {
 
                           <input
                             type="text"
-                            value={
-                              customerName
-                            }
+                            value={customerName}
                             onChange={(e) =>
                               setCustomerName(
                                 e.target.value
@@ -1537,17 +1479,19 @@ function Navbar() {
                               focus:border-[#c68b59]
                               focus:ring-4
                               focus:ring-[#c68b59]/10
-                              sm:text-sm
                             "
                           />
                         </div>
 
-                        {/* ADDRESS */}
-
                         <div className="relative">
                           <MapPin
                             size={17}
-                            className="absolute left-4 top-4 text-[#9a8a80]"
+                            className="
+                              absolute
+                              left-4
+                              top-4
+                              text-[#9a8a80]
+                            "
                           />
 
                           <textarea
@@ -1577,12 +1521,9 @@ function Navbar() {
                               focus:border-[#c68b59]
                               focus:ring-4
                               focus:ring-[#c68b59]/10
-                              sm:text-sm
                             "
                           />
                         </div>
-
-                        {/* CITY + PHONE */}
 
                         <div className="grid gap-3 sm:grid-cols-2">
                           <div className="relative">
@@ -1621,7 +1562,6 @@ function Navbar() {
                                 focus:border-[#c68b59]
                                 focus:ring-4
                                 focus:ring-[#c68b59]/10
-                                sm:text-sm
                               "
                             />
                           </div>
@@ -1662,7 +1602,6 @@ function Navbar() {
                                 focus:border-[#c68b59]
                                 focus:ring-4
                                 focus:ring-[#c68b59]/10
-                                sm:text-sm
                               "
                             />
                           </div>
@@ -1692,18 +1631,14 @@ function Navbar() {
                             icon: Banknote,
                           },
                         ].map((method) => {
-                          const Icon =
-                            method.icon;
-
+                          const Icon = method.icon;
                           const selected =
                             paymentMethod ===
                             method.name;
 
                           return (
                             <button
-                              key={
-                                method.name
-                              }
+                              key={method.name}
                               type="button"
                               onClick={() =>
                                 setPaymentMethod(
@@ -1731,6 +1666,7 @@ function Navbar() {
                               `}
                             >
                               <Icon size={20} />
+
                               <span className="text-center">
                                 {method.name}
                               </span>
@@ -1749,15 +1685,11 @@ function Navbar() {
                         </span>
 
                         <span className="text-xl font-black text-[#d9a878] sm:text-2xl">
-                          {formatPrice(
-                            grandTotal
-                          )}
+                          {formatPrice(grandTotal)}
                         </span>
                       </div>
                     </div>
                   </div>
-
-                  {/* CHECKOUT BUTTON */}
 
                   <div
                     className="
@@ -1776,9 +1708,7 @@ function Navbar() {
                         scale: 1.02,
                         y: -2,
                       }}
-                      whileTap={{
-                        scale: 0.97,
-                      }}
+                      whileTap={{ scale: 0.97 }}
                       className="
                         flex
                         w-full
@@ -1796,9 +1726,7 @@ function Navbar() {
                         hover:bg-[#a15f37]
                       "
                     >
-                      <CheckCircle2
-                        size={18}
-                      />
+                      <CheckCircle2 size={18} />
                       Confirm Order
                     </motion.button>
                   </div>
@@ -1841,6 +1769,7 @@ function Navbar() {
                       flex
                       h-24
                       w-24
+                      shrink-0
                       items-center
                       justify-center
                       rounded-full
@@ -1851,34 +1780,15 @@ function Navbar() {
                     <CheckCircle2 size={48} />
                   </motion.div>
 
-                  <motion.h3
-                    initial={{
-                      opacity: 0,
-                      y: 15,
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                    }}
-                    transition={{
-                      delay: 0.2,
-                    }}
-                    className="
-                      mt-7
-                      text-2xl
-                      font-black
-                      text-[#2b1b14]
-                      sm:text-3xl
-                    "
-                  >
+                  <h3 className="mt-7 text-2xl font-black text-[#2b1b14] sm:text-3xl">
                     Order Confirmed!
-                  </motion.h3>
+                  </h3>
 
                   <p className="mt-3 max-w-sm text-sm leading-6 text-[#806b5f]">
-                    Thank you for ordering
-                    from Dina & Coffee. Your
-                    freshly brewed favorites are
-                    being prepared.
+                    Thank you for ordering from
+                    Dina & Coffee. Your freshly
+                    brewed favorites are being
+                    prepared.
                   </p>
 
                   <div
@@ -1937,15 +1847,9 @@ function Navbar() {
                   >
                     <motion.button
                       type="button"
-                      onClick={
-                        handleTrackOrder
-                      }
-                      whileHover={{
-                        scale: 1.03,
-                      }}
-                      whileTap={{
-                        scale: 0.97,
-                      }}
+                      onClick={handleTrackOrder}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
                       className="
                         flex
                         flex-1
@@ -1967,15 +1871,9 @@ function Navbar() {
 
                     <motion.button
                       type="button"
-                      onClick={
-                        handleCloseCartDrawer
-                      }
-                      whileHover={{
-                        scale: 1.03,
-                      }}
-                      whileTap={{
-                        scale: 0.97,
-                      }}
+                      onClick={handleCloseCartDrawer}
+                      whileHover={{ scale: 1.03 }}
+                      whileTap={{ scale: 0.97 }}
                       className="
                         flex
                         flex-1
@@ -2015,16 +1913,14 @@ function Navbar() {
                     </h3>
 
                     <p className="mt-2 text-sm text-white/60">
-                      Estimated delivery:
-                      25–40 minutes
+                      Estimated delivery: 25–40 minutes
                     </p>
                   </div>
 
                   <div className="mt-7">
                     {[
                       {
-                        title:
-                          "Order Confirmed",
+                        title: "Order Confirmed",
                         description:
                           "Your order has been successfully received.",
                         icon: CheckCircle2,
@@ -2039,8 +1935,7 @@ function Navbar() {
                         active: true,
                       },
                       {
-                        title:
-                          "Out for Delivery",
+                        title: "Out for Delivery",
                         description:
                           "Your order will soon be on its way.",
                         icon: Truck,
@@ -2053,95 +1948,89 @@ function Navbar() {
                         icon: PackageCheck,
                         active: false,
                       },
-                    ].map(
-                      (step, index) => {
-                        const Icon =
-                          step.icon;
+                    ].map((step, index) => {
+                      const Icon = step.icon;
 
-                        return (
-                          <div
-                            key={step.title}
-                            className="relative flex gap-4"
-                          >
-                            {index !== 3 && (
-                              <div
-                                className={`
-                                  absolute
-                                  left-5
-                                  top-10
-                                  h-14
-                                  w-px
-                                  ${
-                                    step.active
-                                      ? "bg-[#c68b59]"
-                                      : "bg-[#dfd1c7]"
-                                  }
-                                `}
-                              />
-                            )}
-
-                            <motion.div
-                              animate={
-                                step.active
-                                  ? {
-                                      scale: [
-                                        1,
-                                        1.08,
-                                        1,
-                                      ],
-                                    }
-                                  : {}
-                              }
-                              transition={{
-                                duration: 2,
-                                repeat:
-                                  Infinity,
-                              }}
+                      return (
+                        <div
+                          key={step.title}
+                          className="relative flex gap-4"
+                        >
+                          {index !== 3 && (
+                            <div
                               className={`
-                                relative
-                                z-10
-                                flex
-                                h-10
-                                w-10
-                                shrink-0
-                                items-center
-                                justify-center
-                                rounded-full
+                                absolute
+                                left-5
+                                top-10
+                                h-14
+                                w-px
                                 ${
                                   step.active
-                                    ? "bg-[#c68b59] text-[#2b1b14]"
-                                    : "bg-[#eee4da] text-[#9a8a80]"
+                                    ? "bg-[#c68b59]"
+                                    : "bg-[#dfd1c7]"
+                                }
+                              `}
+                            />
+                          )}
+
+                          <motion.div
+                            animate={
+                              step.active
+                                ? {
+                                    scale: [
+                                      1,
+                                      1.08,
+                                      1,
+                                    ],
+                                  }
+                                : {}
+                            }
+                            transition={{
+                              duration: 2,
+                              repeat: Infinity,
+                            }}
+                            className={`
+                              relative
+                              z-10
+                              flex
+                              h-10
+                              w-10
+                              shrink-0
+                              items-center
+                              justify-center
+                              rounded-full
+                              ${
+                                step.active
+                                  ? "bg-[#c68b59] text-[#2b1b14]"
+                                  : "bg-[#eee4da] text-[#9a8a80]"
+                              }
+                            `}
+                          >
+                            <Icon size={18} />
+                          </motion.div>
+
+                          <div className="pb-8">
+                            <h4
+                              className={`
+                                text-sm
+                                font-black
+                                ${
+                                  step.active
+                                    ? "text-[#2b1b14]"
+                                    : "text-[#9a8a80]"
                                 }
                               `}
                             >
-                              <Icon size={18} />
-                            </motion.div>
+                              {step.title}
+                            </h4>
 
-                            <div className="pb-8">
-                              <h4
-                                className={`
-                                  text-sm
-                                  font-black
-                                  ${
-                                    step.active
-                                      ? "text-[#2b1b14]"
-                                      : "text-[#9a8a80]"
-                                  }
-                                `}
-                              >
-                                {step.title}
-                              </h4>
-
-                              <p className="mt-1 text-xs leading-5 text-[#806b5f]">
-                                {
-                                  step.description
-                                }
-                              </p>
-                            </div>
+                            <p className="mt-1 text-xs leading-5 text-[#806b5f]">
+                              {step.description}
+                            </p>
                           </div>
-                        );
-                      }
-                    )}
+                        </div>
+                      );
+                    })}
                   </div>
 
                   <div className="mt-3 rounded-3xl border border-[#dfd1c7] bg-white p-5">
@@ -2150,17 +2039,16 @@ function Navbar() {
                         <MapPin size={18} />
                       </div>
 
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-black text-[#2b1b14]">
                           Delivery Address
                         </p>
 
-                        <p className="mt-1 text-sm leading-5 text-[#806b5f]">
+                        <p className="mt-1 break-words text-sm leading-5 text-[#806b5f]">
                           {address ||
                             "Your delivery address"}
-                          {city
-                            ? `, ${city}`
-                            : ""}
+
+                          {city ? `, ${city}` : ""}
                         </p>
                       </div>
                     </div>
@@ -2183,9 +2071,7 @@ function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() =>
-                setProfileOpen(false)
-              }
+              onClick={() => setProfileOpen(false)}
               className="
                 fixed
                 inset-0
@@ -2232,7 +2118,7 @@ function Navbar() {
                 sm:w-[calc(100%-32px)]
               "
             >
-              {/* PROFILE HEADER */}
+              {/* HEADER */}
 
               <div
                 className="
@@ -2248,15 +2134,14 @@ function Navbar() {
                 "
               >
                 <motion.div
-                  animate={{
-                    rotate: 360,
-                  }}
+                  animate={{ rotate: 360 }}
                   transition={{
                     duration: 20,
                     repeat: Infinity,
                     ease: "linear",
                   }}
                   className="
+                    pointer-events-none
                     absolute
                     -right-16
                     -top-16
@@ -2270,9 +2155,7 @@ function Navbar() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setProfileOpen(false)
-                  }
+                  onClick={() => setProfileOpen(false)}
                   className="
                     absolute
                     right-4
@@ -2430,9 +2313,7 @@ function Navbar() {
 
                     <button
                       type="button"
-                      onClick={
-                        handleSignOut
-                      }
+                      onClick={handleSignOut}
                       className="
                         flex
                         w-full
@@ -2458,23 +2339,18 @@ function Navbar() {
               ) : (
                 <div className="p-5 sm:p-6">
                   <p className="text-center text-sm leading-6 text-[#806b5f]">
-                    Sign in to view your
-                    orders, favorites and
-                    rewards.
+                    Sign in to view your orders,
+                    favorites and rewards.
                   </p>
 
                   <motion.button
                     type="button"
-                    onClick={
-                      handleSignIn
-                    }
+                    onClick={handleSignIn}
                     whileHover={{
                       scale: 1.02,
                       y: -2,
                     }}
-                    whileTap={{
-                      scale: 0.97,
-                    }}
+                    whileTap={{ scale: 0.97 }}
                     className="
                       mt-5
                       flex
