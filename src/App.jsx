@@ -14,7 +14,7 @@ function App() {
     <div className="min-h-screen bg-[#f8f3ed]">
      
       <Navbar />
-
+<main className="pt-[76px]"></main>
       <main>
         
         <Hero />

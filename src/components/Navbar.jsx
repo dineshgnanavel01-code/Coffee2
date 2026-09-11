@@ -106,6 +106,24 @@ function Navbar() {
   }, []);
 
   /* =========================================================
+     CLOSE MOBILE MENU WHEN SCREEN BECOMES DESKTOP
+  ========================================================= */
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  /* =========================================================
      BODY SCROLL LOCK
   ========================================================= */
 
@@ -115,12 +133,15 @@ function Navbar() {
 
     if (shouldLock) {
       document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     }
 
     return () => {
       document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     };
   }, [menuOpen, cartOpen, profileOpen]);
 
@@ -167,6 +188,7 @@ function Navbar() {
 
   const openCart = () => {
     setMenuOpen(false);
+    setProfileOpen(false);
     setCheckoutStep("cart");
     setCartOpen(true);
   };
@@ -177,6 +199,20 @@ function Navbar() {
     setTimeout(() => {
       setCheckoutStep("cart");
     }, 300);
+  };
+
+  /* =========================================================
+     PROFILE
+  ========================================================= */
+
+  const openProfile = () => {
+    setMenuOpen(false);
+    setCartOpen(false);
+    setProfileOpen(true);
+  };
+
+  const closeProfile = () => {
+    setProfileOpen(false);
   };
 
   /* =========================================================
@@ -218,7 +254,7 @@ function Navbar() {
   };
 
   /* =========================================================
-     PROFILE
+     LOGIN
   ========================================================= */
 
   const handleSignOut = () => {
@@ -238,10 +274,15 @@ function Navbar() {
       ====================================================== */}
 
       <motion.header
-        initial={{ y: -80 }}
+        /*
+          IMPORTANT:
+          initial={false} prevents the navbar from appearing
+          late/off-screen during the first mobile page load.
+        */
+        initial={false}
         animate={{ y: 0 }}
         transition={{
-          duration: 0.55,
+          duration: 0.4,
           ease: [0.22, 1, 0.36, 1],
         }}
         className={`
@@ -269,9 +310,7 @@ function Navbar() {
             w-full
             max-w-[2050px]
             items-center
-            justify-between
             gap-2
-            overflow-hidden
             px-3
             sm:px-6
             lg:px-10
@@ -388,6 +427,7 @@ function Navbar() {
             className="
               hidden
               min-w-0
+              flex-1
               items-center
               justify-center
               gap-1
@@ -471,6 +511,7 @@ function Navbar() {
 
           <div
             className="
+              ml-auto
               flex
               shrink-0
               items-center
@@ -562,10 +603,7 @@ function Navbar() {
 
             <motion.button
               type="button"
-              onClick={() => {
-                setMenuOpen(false);
-                setProfileOpen(true);
-              }}
+              onClick={openProfile}
               whileHover={{
                 scale: 1.05,
                 y: -1,
@@ -592,7 +630,7 @@ function Navbar() {
               <User size={20} />
             </motion.button>
 
-            {/* MOBILE MENU BUTTON */}
+            {/* MOBILE MENU */}
 
             <motion.button
               type="button"
@@ -711,17 +749,17 @@ function Navbar() {
                 x: "100%",
               }}
               transition={{
-                duration: 0.35,
+                duration: 0.32,
                 ease: [0.22, 1, 0.36, 1],
               }}
               className="
                 fixed
                 right-0
                 top-[76px]
-                z-[95]
+                z-[110]
                 flex
                 h-[calc(100dvh-76px)]
-                w-[min(88vw,380px)]
+                w-[min(92vw,380px)]
                 max-w-full
                 flex-col
                 overflow-x-hidden
@@ -730,7 +768,8 @@ function Navbar() {
                 border-l
                 border-white/10
                 bg-[#2b1b14]
-                p-4
+                p-3
+                pb-[max(1rem,env(safe-area-inset-bottom))]
                 shadow-2xl
                 sm:p-5
                 lg:hidden
@@ -740,13 +779,14 @@ function Navbar() {
 
               <div
                 className="
-                  mb-5
+                  mb-4
                   shrink-0
                   rounded-3xl
                   border
                   border-white/10
                   bg-white/5
                   p-4
+                  sm:mb-5
                 "
               >
                 <div className="flex items-center gap-3">
@@ -802,8 +842,7 @@ function Navbar() {
                           x: 0,
                         }}
                         transition={{
-                          delay:
-                            index * 0.05,
+                          delay: index * 0.045,
                         }}
                         whileHover={{
                           x: 5,
@@ -858,10 +897,7 @@ function Navbar() {
 
               <motion.button
                 type="button"
-                onClick={() => {
-                  closeMobileMenu();
-                  setProfileOpen(true);
-                }}
+                onClick={openProfile}
                 whileTap={{ scale: 0.97 }}
                 className="
                   mt-3
@@ -956,7 +992,7 @@ function Navbar() {
       </AnimatePresence>
 
       {/* =====================================================
-          CART
+          CART DRAWER
       ====================================================== */}
 
       <AnimatePresence>
@@ -1072,7 +1108,7 @@ function Navbar() {
               </div>
 
               {/* =================================================
-                  CART CONTENT
+                  CART
               ================================================== */}
 
               {checkoutStep === "cart" && (
@@ -1632,6 +1668,7 @@ function Navbar() {
                           },
                         ].map((method) => {
                           const Icon = method.icon;
+
                           const selected =
                             paymentMethod ===
                             method.name;
@@ -2071,7 +2108,7 @@ function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setProfileOpen(false)}
+              onClick={closeProfile}
               className="
                 fixed
                 inset-0
@@ -2118,7 +2155,7 @@ function Navbar() {
                 sm:w-[calc(100%-32px)]
               "
             >
-              {/* HEADER */}
+              {/* PROFILE HEADER */}
 
               <div
                 className="
@@ -2155,7 +2192,7 @@ function Navbar() {
 
                 <button
                   type="button"
-                  onClick={() => setProfileOpen(false)}
+                  onClick={closeProfile}
                   className="
                     absolute
                     right-4
